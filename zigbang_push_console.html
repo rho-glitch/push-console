@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>직방 마케팅 푸시 콘솔</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f11;
+  --bg2: #16181c;
+  --bg3: #1e2026;
+  --bg4: #252830;
+  --border: rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.13);
+  --text: #e8eaf0;
+  --text2: #8b8f9e;
+  --text3: #555966;
+  --blue: #4f80ff;
+  --blue-bg: rgba(79,128,255,.12);
+  --blue-border: rgba(79,128,255,.35);
+  --green: #3ecf8e;
+  --green-bg: rgba(62,207,142,.1);
+  --green-border: rgba(62,207,142,.3);
+  --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,.1);
+  --purple-border: rgba(167,139,250,.3);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,.1);
+  --red: #f87171;
+  --red-bg: rgba(248,113,113,.1);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+/* ── Layout ── */
+.app { display: grid; grid-template-columns: 220px 1fr 320px; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 0; display: flex; flex-direction: column; }
+.logo { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+.logo-mark { display: flex; align-items: center; gap: 9px; }
+.logo-icon { width: 28px; height: 28px; background: var(--blue); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+.logo-text { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
+.logo-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.nav { padding: 12px 10px; flex: 1; }
+.nav-section { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; padding: 0 8px; margin: 14px 0 6px; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text2); font-size: 13px; transition: all .15s; margin-bottom: 1px; }
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .7; }
+.nav-item.active svg { opacity: 1; }
+.nav-badge { margin-left: auto; font-size: 10px; background: var(--blue); color: #fff; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+.sidebar-footer { padding: 14px; border-top: 1px solid var(--border); }
+.user-row { display: flex; align-items: center; gap: 9px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--purple-bg); border: 1px solid var(--purple-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--purple); }
+.user-name { font-size: 12px; font-weight: 500; }
+.user-role { font-size: 10px; color: var(--text3); }
+
+/* ── Main ── */
+.main { overflow-y: auto; background: var(--bg); }
+.main-header { padding: 22px 28px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.page-title { font-size: 18px; font-weight: 700; letter-spacing: -.4px; }
+.page-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.step-tabs { display: flex; gap: 0; }
+.step-tab { display: flex; align-items: center; gap: 8px; padding: 14px 20px; font-size: 12px; font-weight: 500; color: var(--text3); border-bottom: 2px solid transparent; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.step-tab:hover { color: var(--text2); }
+.step-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.step-tab.done { color: var(--green); }
+.step-num { width: 18px; height: 18px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.step-tab.active .step-num { background: var(--blue); border-color: var(--blue); color: #fff; }
+.step-tab.done .step-num { background: var(--green); border-color: var(--green); color: #fff; }
+.main-body { padding: 24px 28px; }
+
+/* ── Cards ── */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.card-title svg { opacity: .6; width: 15px; height: 15px; }
+.card-action { font-size: 11px; color: var(--text3); cursor: pointer; }
+.card-action:hover { color: var(--text2); }
+
+/* ── Step panels ── */
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+/* ── Filter chips ── */
+.filter-section { margin-bottom: 16px; }
+.filter-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dot-sure { background: var(--green); }
+.dot-est { background: var(--purple); }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { padding: 4px 11px; border-radius: 14px; border: 1px solid var(--border2); font-size: 12px; color: var(--text2); cursor: pointer; transition: all .12s; white-space: nowrap; user-select: none; background: transparent; }
+.chip:hover { border-color: rgba(255,255,255,.22); color: var(--text); }
+.chip.on { background: var(--blue-bg); border-color: var(--blue-border); color: #9db8ff; }
+.chip.est { border-style: dashed; }
+.chip.est.on { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple); }
+.chip-divider { width: 1px; height: 20px; background: var(--border); margin: 0 2px; align-self: center; }
+
+/* ── Seoul gu panel ── */
+.sido-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.sido-chip { padding: 5px 13px; border-radius: 14px; border: 1px solid var(--border2); font-size: 12px; color: var(--text2); cursor: pointer; transition: all .12s; user-select: none; }
+.sido-chip:hover { border-color: rgba(255,255,255,.22); color: var(--text); }
+.sido-chip.on { background: var(--green-bg); border-color: var(--green-border); color: var(--green); font-weight: 500; }
+.gu-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: none; margin-top: 8px; }
+.gu-panel.open { display: block; }
+.gu-zone { margin-bottom: 10px; }
+.gu-zone-title { font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 5px; }
+.gu-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.gu-chip { padding: 3px 9px; border-radius: 10px; border: 1px solid var(--border); font-size: 11px; color: var(--text3); cursor: pointer; transition: all .12s; }
+.gu-chip:hover { border-color: var(--border2); color: var(--text2); }
+.gu-chip.on { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+.gu-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.gu-header-title { font-size: 12px; font-weight: 500; color: var(--text2); }
+.gu-actions { display: flex; gap: 10px; }
+.gu-btn { font-size: 11px; color: var(--text3); background: none; border: none; cursor: pointer; }
+.gu-btn:hover { color: var(--text2); }
+
+/* ── Message editor ── */
+.msg-editor { display: grid; grid-template-columns: 1fr 240px; gap: 16px; align-items: start; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.form-label span { font-weight: 400; color: var(--text3); font-size: 10px; }
+.form-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-size: 13px; font-family: inherit; transition: border .15s; outline: none; }
+.form-input:focus { border-color: var(--blue-border); }
+.form-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px; outline: none; transition: border .15s; line-height: 1.6; }
+.form-textarea:focus { border-color: var(--blue-border); }
+.char-count { font-size: 10px; color: var(--text3); text-align: right; margin-top: 3px; }
+.svc-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.svc-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 10px; text-align: center; cursor: pointer; transition: all .15s; }
+.svc-card:hover { border-color: var(--border2); }
+.svc-card.on { background: var(--blue-bg); border-color: var(--blue-border); }
+.svc-icon { font-size: 20px; margin-bottom: 5px; }
+.svc-name { font-size: 12px; font-weight: 500; }
+.svc-card.on .svc-name { color: #9db8ff; }
+
+/* ── Phone preview ── */
+.phone-wrap { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.phone-label { font-size: 11px; color: var(--text3); margin-bottom: 10px; text-align: center; }
+.phone-frame { background: #1a1a2e; border-radius: 24px; padding: 14px 10px; border: 6px solid #2a2a3e; min-height: 200px; position: relative; }
+.phone-notch { width: 60px; height: 6px; background: #2a2a3e; border-radius: 3px; margin: 0 auto 16px; }
+.notif-card { background: rgba(255,255,255,.1); border-radius: 14px; padding: 11px 13px; backdrop-filter: blur(10px); }
+.notif-app-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.notif-app-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.notif-app-name { font-size: 11px; color: rgba(255,255,255,.55); flex: 1; }
+.notif-time { font-size: 10px; color: rgba(255,255,255,.35); }
+.notif-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 3px; line-height: 1.3; }
+.notif-body { font-size: 12px; color: rgba(255,255,255,.7); line-height: 1.4; }
+
+/* ── Timing ── */
+.timing-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.timing-btn { flex: 1; padding: 9px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .15s; text-align: center; }
+.timing-btn:hover { border-color: var(--border2); color: var(--text); }
+.timing-btn.on { background: var(--blue-bg); border-color: var(--blue-border); color: #9db8ff; }
+.date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.night-warning { background: var(--red-bg); border: 1px solid rgba(248,113,113,.25); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12px; color: var(--red); margin-top: 8px; display: none; }
+
+/* ── Right panel ── */
+.right-panel { background: var(--bg2); border-left: 1px solid var(--border); padding: 20px 18px; overflow-y: auto; }
+.rp-title { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+.stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+.stat-num { font-size: 28px; font-weight: 700; letter-spacing: -1px; color: var(--text); }
+.stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.bar-label { font-size: 11px; color: var(--text2); width: 52px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+.bar-fill-blue { height: 100%; background: var(--blue); border-radius: 2px; }
+.bar-fill-green { height: 100%; background: var(--green); border-radius: 2px; }
+.bar-pct { font-size: 11px; color: var(--text3); min-width: 28px; text-align: right; }
+.tag-wrap { display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 8px; display: inline-flex; align-items: center; gap: 3px; }
+.tag-blue { background: var(--blue-bg); color: #9db8ff; border: 1px solid var(--blue-border); }
+.tag-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.tag-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
+.tag-x { background: none; border: none; cursor: pointer; color: inherit; font-size: 12px; padding: 0; margin-left: 1px; line-height: 1; }
+.empty-tag { font-size: 11px; color: var(--text3); }
+.query-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 10px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--text3); white-space: pre-wrap; line-height: 1.7; max-height: 160px; overflow-y: auto; }
+.query-keyword { color: #7dd3fc; }
+.query-value { color: #86efac; }
+.query-comment { color: #4b5563; }
+
+/* ── Buttons ── */
+.btn-primary { width: 100%; padding: 11px; background: var(--blue); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.btn-primary:hover { background: #6691ff; }
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+.btn-secondary { width: 100%; padding: 9px; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text2); font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; margin-top: 7px; }
+.btn-secondary:hover { background: var(--bg3); }
+.nav-footer-btn { width: 100%; padding: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text2); font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+.nav-footer-btn:hover { background: var(--bg4); }
+.next-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 11px 16px; background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius-sm); color: #9db8ff; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; margin-top: 16px; }
+.next-btn:hover { background: rgba(79,128,255,.2); }
+.next-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ── Result screen ── */
+.result-screen { text-align: center; padding: 40px 20px; }
+.result-icon { width: 64px; height: 64px; background: var(--green-bg); border: 1px solid var(--green-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+.result-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.result-sub { font-size: 13px; color: var(--text3); line-height: 1.7; }
+.result-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 24px 0; }
+.result-stat { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.result-stat-num { font-size: 20px; font-weight: 700; color: var(--green); }
+.result-stat-label { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 14px; overflow: hidden; }
+.progress-bar { height: 100%; background: var(--green); border-radius: 2px; transition: width .3s; }
+
+/* ── Demo banner ── */
+.demo-banner { background: var(--amber-bg); border-bottom: 1px solid rgba(245,158,11,.2); padding: 7px 20px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--amber); }
+.demo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+
+/* ── Misc ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.legend { display: flex; gap: 14px; margin-bottom: 14px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+.coverage { font-size: 10px; color: var(--text3); margin-left: 4px; }
+.badge-sure { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; background: var(--green-bg); color: var(--green); padding: 1px 6px; border-radius: 8px; border: 1px solid var(--green-border); }
+.badge-est { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; background: var(--purple-bg); color: var(--purple); padding: 1px 6px; border-radius: 8px; border: 1px solid var(--purple-border); }
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.mock-api-log { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; color: var(--text3); max-height: 120px; overflow-y: auto; line-height: 1.8; display: none; }
+.mock-api-log.show { display: block; }
+.log-ok { color: var(--green); }
+.log-info { color: #7dd3fc; }
+.log-warn { color: var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">
+  <div class="demo-dot"></div>
+  데모 모드 — 실제 API 미연결 상태입니다. 발송 버튼을 눌러도 실제 푸시는 발송되지 않습니다.
+</div>
+
+<div class="app">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon">Z</div>
+      <div>
+        <div class="logo-text">Push Console</div>
+        <div class="logo-sub">마케팅 발송 툴</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">캠페인</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      새 캠페인
+      <span class="nav-badge">NEW</span>
+    </div>
+    <div class="nav-item" onclick="showTab('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      발송 내역
+    </div>
+    <div class="nav-section">분석</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      대시보드
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      성과 분석
+    </div>
+    <div class="nav-section">설정</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      API 설정
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="avatar">MK</div>
+      <div>
+        <div class="user-name">마케팅팀</div>
+        <div class="user-role">직방 CRM</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+  <div class="main-header">
+    <div>
+      <div class="page-title">새 캠페인</div>
+      <div class="page-sub">타겟 선택 → 메시지 작성 → 발송 설정 → 완료</div>
+    </div>
+    <div class="step-tabs">
+      <div class="step-tab active" id="tab-1" onclick="goStep(1)">
+        <div class="step-num">1</div> 타겟 선택
+      </div>
+      <div class="step-tab" id="tab-2" onclick="goStep(2)">
+        <div class="step-num">2</div> 메시지 작성
+      </div>
+      <div class="step-tab" id="tab-3" onclick="goStep(3)">
+        <div class="step-num">3</div> 발송 설정
+      </div>
+      <div class="step-tab" id="tab-4">
+        <div class="step-num">4</div> 완료
+      </div>
+    </div>
+  </div>
+
+  <div class="main-body">
+
+    <!-- STEP 1: 타겟 -->
+    <div class="step-panel active" id="step-1">
+      <div class="legend">
+        <span class="leg"><span class="dot dot-sure"></span>확실 (DB 직접)</span>
+        <span class="leg"><span class="dot dot-est"></span>추정 (로그 추론)</span>
+      </div>
+
+      <!-- 거주 지역 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            거주 지역
+            <span class="badge-sure">확실 · zb_user_seg_tag</span>
+            <span style="font-size:10px;color:var(--text3);font-weight:400">커버율 31%</span>
+          </div>
+          <span class="card-action" onclick="clearGroup('sido');clearGu()">초기화</span>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label">시도</div>
+          <div class="sido-chips" id="sido-chips">
+            <span class="sido-chip" onclick="toggleSido('서울',this)">서울</span>
+            <span class="sido-chip" onclick="toggleSido('경기',this)">경기</span>
+            <span class="sido-chip" onclick="toggleSido('인천',this)">인천</span>
+            <span class="sido-chip" onclick="toggleSido('부산',this)">부산</span>
+            <span class="sido-chip" onclick="toggleSido('대구',this)">대구</span>
+            <span class="sido-chip" onclick="toggleSido('대전',this)">대전</span>
+            <span class="sido-chip" onclick="toggleSido('광주',this)">광주</span>
+            <span class="sido-chip" onclick="toggleSido('세종',this)">세종</span>
+            <span class="sido-chip" onclick="toggleSido('제주',this)">제주</span>
+            <span class="sido-chip" onclick="toggleSido('강원',this)">강원</span>
+            <span class="sido-chip" onclick="toggleSido('충북',this)">충북</span>
+            <span class="sido-chip" onclick="toggleSido('충남',this)">충남</span>
+            <span class="sido-chip" onclick="toggleSido('전북',this)">전북</span>
+            <span class="sido-chip" onclick="toggleSido('전남',this)">전남</span>
+            <span class="sido-chip" onclick="toggleSido('경북',this)">경북</span>
+            <span class="sido-chip" onclick="toggleSido('경남',this)">경남</span>
+          </div>
+          <div class="gu-panel" id="gu-panel">
+            <div class="gu-header">
+              <div class="gu-header-title">서울 구 선택 <span style="font-weight:400;color:var(--text3);font-size:11px">(선택 안 하면 서울 전체)</span></div>
+              <div class="gu-actions">
+                <button class="gu-btn" onclick="selectAllGu()">전체 선택</button>
+                <button class="gu-btn" onclick="clearGu()">초기화</button>
+              </div>
+            </div>
+            <div class="gu-zone">
+              <div class="gu-zone-title">도심권</div>
+              <div class="gu-chips">
+                <span class="gu-chip" onclick="toggleGu('종로구',this)">종로구</span>
+                <span class="gu-chip" onclick="toggleGu('중구',this)">중구</span>
+                <span class="gu-chip" onclick="toggleGu('용산구',this)">용산구</span>
+              </div>
+            </div>
+            <div class="gu-zone">
+              <div class="gu-zone-title">동북권</div>
+              <div class="gu-chips">
+                <span class="gu-chip" onclick="toggleGu('성동구',this)">성동구</span>
+                <span class="gu-chip" onclick="toggleGu('광진구',this)">광진구</span>
+                <span class="gu-chip" onclick="toggleGu('동대문구',this)">동대문구</span>
+                <span class="gu-chip" onclick="toggleGu('중랑구',this)">중랑구</span>
+                <span class="gu-chip" onclick="toggleGu('성북구',this)">성북구</span>
+                <span class="gu-chip" onclick="toggleGu('강북구',this)">강북구</span>
+                <span class="gu-chip" onclick="toggleGu('도봉구',this)">도봉구</span>
+                <span class="gu-chip" onclick="toggleGu('노원구',this)">노원구</span>
+              </div>
+            </div>
+            <div class="gu-zone">
+              <div class="gu-zone-title">서북권</div>
+              <div class="gu-chips">
+                <span class="gu-chip" onclick="toggleGu('은평구',this)">은평구</span>
+                <span class="gu-chip" onclick="toggleGu('서대문구',this)">서대문구</span>
+                <span class="gu-chip" onclick="toggleGu('마포구',this)">마포구</span>
+              </div>
+            </div>
+            <div class="gu-zone">
+              <div class="gu-zone-title">서남권</div>
+              <div class="gu-chips">
+                <span class="gu-chip" onclick="toggleGu('양천구',this)">양천구</span>
+                <span class="gu-chip" onclick="toggleGu('강서구',this)">강서구</span>
+                <span class="gu-chip" onclick="toggleGu('구로구',this)">구로구</span>
+                <span class="gu-chip" onclick="toggleGu('금천구',this)">금천구</span>
+                <span class="gu-chip" onclick="toggleGu('영등포구',this)">영등포구</span>
+                <span class="gu-chip" onclick="toggleGu('동작구',this)">동작구</span>
+                <span class="gu-chip" onclick="toggleGu('관악구',this)">관악구</span>
+              </div>
+            </div>
+            <div class="gu-zone">
+              <div class="gu-zone-title">동남권 (강남)</div>
+              <div class="gu-chips">
+                <span class="gu-chip" onclick="toggleGu('서초구',this)">서초구</span>
+                <span class="gu-chip" onclick="toggleGu('강남구',this)">강남구</span>
+                <span class="gu-chip" onclick="toggleGu('송파구',this)">송파구</span>
+                <span class="gu-chip" onclick="toggleGu('강동구',this)">강동구</span>
+              </div>
+            </div>
+            <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+              <div style="font-size:11px;color:var(--text2);font-weight:500;margin-bottom:5px">선택된 구 <span id="gu-badge" style="display:none;background:var(--green-bg);color:var(--green);font-size:10px;padding:1px 6px;border-radius:8px;border:1px solid var(--green-border);margin-left:4px"></span></div>
+              <div id="gu-selected-wrap" style="display:flex;flex-wrap:wrap;gap:4px">
+                <span style="font-size:11px;color:var(--text3)">없음 (서울 전체)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 기본 정보 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            기본 정보
+          </div>
+          <span class="card-action" onclick="clearGroup('basic')">초기화</span>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>성별 · 연령대</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'basic','남성')">남성</span>
+            <span class="chip" onclick="toggle(this,'basic','여성')">여성</span>
+            <span class="chip-divider"></span>
+            <span class="chip" onclick="toggle(this,'basic','20대')">20대</span>
+            <span class="chip" onclick="toggle(this,'basic','30대')">30대</span>
+            <span class="chip" onclick="toggle(this,'basic','40대')">40대</span>
+            <span class="chip" onclick="toggle(this,'basic','50대 이상')">50대+</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>가구 상황</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'basic','기혼')">기혼</span>
+            <span class="chip" onclick="toggle(this,'basic','미혼')">미혼</span>
+            <span class="chip" onclick="toggle(this,'basic','세대주')">세대주</span>
+            <span class="chip" onclick="toggle(this,'basic','자녀 있음')">자녀 있음</span>
+            <span class="chip est" onclick="toggle(this,'basic','반려동물')">🐾 반려동물</span>
+            <span class="chip" onclick="toggle(this,'basic','무주택')">무주택</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>주사용 플랫폼</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'basic','직방 주사용')">직방</span>
+            <span class="chip" onclick="toggle(this,'basic','호갱노노 주사용')">호갱노노</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 희망 매물 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            희망 매물 · 거래 유형
+          </div>
+          <span class="card-action" onclick="clearGroup('want')">초기화</span>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-est"></span>매물 유형 <span class="badge-est" style="margin-left:4px">추정 · dw_member_total_card</span></div>
+          <div class="chips">
+            <span class="chip est" onclick="toggle(this,'want','아파트')">아파트</span>
+            <span class="chip est" onclick="toggle(this,'want','오피스텔')">오피스텔</span>
+            <span class="chip est" onclick="toggle(this,'want','빌라/연립')">빌라/연립</span>
+            <span class="chip est" onclick="toggle(this,'want','원룸')">원룸</span>
+            <span class="chip est" onclick="toggle(this,'want','신축분양')">신축분양</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-est"></span>거래 유형</div>
+          <div class="chips">
+            <span class="chip est" onclick="toggle(this,'want','매매')">매매</span>
+            <span class="chip est" onclick="toggle(this,'want','전세')">전세</span>
+            <span class="chip est" onclick="toggle(this,'want','월세')">월세</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>필수 조건 (AI 대화 추출) <span style="color:var(--text3);font-weight:400">커버율 2.6%</span></div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'want','반려동물 가능')">반려동물 가능</span>
+            <span class="chip" onclick="toggle(this,'want','즉시입주')">즉시입주</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 탐색 활동 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            탐색 활동
+          </div>
+          <span class="card-action" onclick="clearGroup('act')">초기화</span>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>접속 상태 · dw_member_summary</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'act','최근 7일 접속')">최근 7일 접속</span>
+            <span class="chip" onclick="toggle(this,'act','최근 30일 접속')">최근 30일 접속</span>
+            <span class="chip" onclick="toggle(this,'act','30일+ 미접속')">30일+ 미접속</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>관심/저장</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'act','찜 1건+')">찜 1건+</span>
+            <span class="chip" onclick="toggle(this,'act','찜 10건+')">찜 10건+</span>
+            <span class="chip" onclick="toggle(this,'act','단지 알림 설정')">단지 알림 설정</span>
+            <span class="chip" onclick="toggle(this,'act','지역 알림 설정')">지역 알림 설정</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>기능 사용 · 수신 동의</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'act','AI채팅 사용')">AI 채팅</span>
+            <span class="chip" onclick="toggle(this,'act','거주민인증 완료')">거주민 인증</span>
+            <span class="chip" onclick="toggle(this,'act','시세비교 사용')">시세 비교</span>
+            <span class="chip" onclick="toggle(this,'act','학군정보 조회')">학군 정보</span>
+            <span class="chip" onclick="toggle(this,'act','푸시 수신 동의')">푸시 동의</span>
+            <span class="chip" onclick="toggle(this,'act','마케팅 동의')">마케팅 동의</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 전환 가능성 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            전환 가능성
+          </div>
+          <span class="card-action" onclick="clearGroup('conv')">초기화</span>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-est"></span>CRM 등급 · dw_member_total_card</div>
+          <div class="chips">
+            <span class="chip est" onclick="toggle(this,'conv','원오빌 코어')">원오빌 코어</span>
+            <span class="chip est" onclick="toggle(this,'conv','원오빌 잠재')">원오빌 잠재</span>
+            <span class="chip est" onclick="toggle(this,'conv','아파트 코어')">아파트 코어</span>
+            <span class="chip est" onclick="toggle(this,'conv','아파트 잠재')">아파트 잠재</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-sure"></span>문의 활동 · dw_total_call</div>
+          <div class="chips">
+            <span class="chip" onclick="toggle(this,'conv','문의 1건+')">문의 1건+</span>
+            <span class="chip" onclick="toggle(this,'conv','문의 5건+')">문의 5건+</span>
+            <span class="chip" onclick="toggle(this,'conv','최근 30일 문의')">최근 30일 문의</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-label"><span class="dot dot-est"></span>의사결정 단계</div>
+          <div class="chips">
+            <span class="chip est" onclick="toggle(this,'conv','단계:탐색')">탐색</span>
+            <span class="chip est" onclick="toggle(this,'conv','단계:비교')">비교</span>
+            <span class="chip est" onclick="toggle(this,'conv','단계:결정')">결정</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="next-btn" id="next-1" onclick="goStep(2)" disabled>
+        다음 단계 — 메시지 작성
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <!-- STEP 2: 메시지 -->
+    <div class="step-panel" id="step-2">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            서비스 선택
+          </div>
+        </div>
+        <div class="svc-grid">
+          <div class="svc-card on" id="svc-zigbang" onclick="selectSvc('zigbang',this)">
+            <div class="svc-icon">🏙</div>
+            <div class="svc-name">직방</div>
+          </div>
+          <div class="svc-card" id="svc-hogangnono" onclick="selectSvc('hogangnono',this)">
+            <div class="svc-icon">🏡</div>
+            <div class="svc-name">호갱노노</div>
+          </div>
+          <div class="svc-card" id="svc-ceo" onclick="selectSvc('ceo',this)">
+            <div class="svc-icon">💼</div>
+            <div class="svc-name">직방 CEO</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            메시지 작성
+          </div>
+        </div>
+        <div class="msg-editor">
+          <div>
+            <div class="form-group">
+              <div class="form-label">제목 <span id="title-cc">0 / 50</span></div>
+              <input type="text" class="form-input" id="msg-title" placeholder="예: 관심 매물 가격이 내려갔어요" maxlength="50" oninput="onMsgInput()">
+            </div>
+            <div class="form-group">
+              <div class="form-label">본문 <span id="body-cc">0 / 100</span></div>
+              <textarea class="form-textarea" id="msg-body" placeholder="예: 서초구 아파트 호가가 500만원 하락했습니다" maxlength="100" oninput="onMsgInput()"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">딥링크 <span>선택사항</span></div>
+              <input type="text" class="form-input" id="msg-deeplink" placeholder="zigbang://listing/12345" oninput="onMsgInput()">
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-label">미리보기</div>
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="notif-card">
+                <div class="notif-app-row">
+                  <div class="notif-app-icon" id="prev-icon" style="background:#4f80ff">직</div>
+                  <span class="notif-app-name" id="prev-appname">직방</span>
+                  <span class="notif-time">지금</span>
+                </div>
+                <div class="notif-title" id="prev-title">제목을 입력해주세요</div>
+                <div class="notif-body" id="prev-body">본문을 입력해주세요</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="next-btn" id="next-2" onclick="goStep(3)" disabled>
+        다음 단계 — 발송 설정
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <!-- STEP 3: 발송 설정 -->
+    <div class="step-panel" id="step-3">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            발송 시각
+          </div>
+        </div>
+        <div class="timing-row">
+          <div class="timing-btn on" id="timing-now" onclick="setTiming('now')">⚡ 즉시 발송</div>
+          <div class="timing-btn" id="timing-sched" onclick="setTiming('sched')">📅 예약 발송</div>
+        </div>
+        <div id="sched-fields" style="display:none">
+          <div class="date-row">
+            <div class="form-group" style="margin-bottom:0">
+              <div class="form-label">날짜</div>
+              <input type="date" class="form-input" id="sched-date" oninput="checkNight()">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <div class="form-label">시각</div>
+              <input type="time" class="form-input" id="sched-time" oninput="checkNight()">
+            </div>
+          </div>
+          <div class="night-warning" id="night-warn">🌙 야간(21:00~08:00 KST) 발송은 불가합니다. 시각을 변경해주세요.</div>
+        </div>
+        <div id="timing-note" style="font-size:12px;color:var(--text3);margin-top:10px">야간(21:00~08:00) 시간대는 자동으로 차단됩니다.</div>
+      </div>
+
+      <!-- 최종 확인 요약 -->
+      <div class="card" id="confirm-summary">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            발송 최종 확인
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">서비스</div>
+            <div style="font-size:14px;font-weight:600" id="sum-svc">직방</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">예상 발송 인원</div>
+            <div style="font-size:14px;font-weight:600;color:var(--green)" id="sum-users">—</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">제목</div>
+            <div style="font-size:13px;font-weight:500" id="sum-title">—</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">발송 시각</div>
+            <div style="font-size:13px;font-weight:500" id="sum-timing">즉시</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">API 페이로드 미리보기</div>
+          <pre class="query-box" id="payload-preview"></pre>
+        </div>
+
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">발송 로그</div>
+        <div class="mock-api-log" id="api-log"></div>
+
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <button class="btn-primary" id="send-btn" onclick="sendCampaign()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            발송하기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: 완료 -->
+    <div class="step-panel" id="step-4">
+      <div class="card">
+        <div class="result-screen">
+          <div class="result-icon">✓</div>
+          <div class="result-title">발송 완료!</div>
+          <div class="result-sub" id="result-sub-text">캠페인이 성공적으로 등록되었습니다.</div>
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="result-stat-num" id="res-users">—</div>
+              <div class="result-stat-label">발송 대상</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-num" id="res-svc">—</div>
+              <div class="result-stat-label">서비스</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-num" id="res-time">—</div>
+              <div class="result-stat-label">발송 시각</div>
+            </div>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="result-progress" style="width:0%"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px" id="result-progress-label"></div>
+          <button class="btn-primary" style="max-width:200px;margin:20px auto 0" onclick="resetAll()">새 캠페인 만들기</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Right Panel ── -->
+<aside class="right-panel">
+  <div class="rp-title">발송 요약</div>
+
+  <div class="stat-card">
+    <div class="stat-num" id="rp-count">—</div>
+    <div class="stat-label">예상 발송 모수</div>
+    <div id="rp-bars" style="display:none">
+      <div class="bar-row">
+        <span class="bar-label">iOS</span>
+        <div class="bar-track"><div class="bar-fill-blue" style="width:58%"></div></div>
+        <span class="bar-pct">58%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Android</span>
+        <div class="bar-track"><div class="bar-fill-green" style="width:42%"></div></div>
+        <span class="bar-pct">42%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="rp-title" style="margin-bottom:8px">선택된 조건</div>
+    <div class="tag-wrap" id="rp-tags"><span class="empty-tag">없음</span></div>
+  </div>
+
+  <div class="stat-card">
+    <div class="rp-title" style="margin-bottom:8px">Superset 쿼리</div>
+    <pre class="query-box" id="rp-query">-- 조건을 선택하면
+-- 쿼리가 생성됩니다</pre>
+  </div>
+</aside>
+
+</div>
+
+<script>
+const state = {
+  sido: new Set(), gu: new Set(),
+  basic: [], want: [], act: [], conv: [],
+  svc: 'zigbang', timing: 'now',
+  nightBlocked: false
+};
+const estSet = new Set();
+const svcMeta = {
+  zigbang: { name:'직방', icon:'직', color:'#4f80ff' },
+  hogangnono: { name:'호갱노노', icon:'호', color:'#3ecf8e' },
+  ceo: { name:'직방CEO', icon:'C', color:'#a78bfa' }
+};
+let currentStep = 1;
+
+function goStep(n) {
+  if (n > currentStep + 1) return;
+  currentStep = n;
+  document.querySelectorAll('.step-panel').forEach((p,i) => p.classList.toggle('active', i+1===n));
+  document.querySelectorAll('.step-tab').forEach((t,i) => {
+    t.classList.remove('active','done');
+    if (i+1 === n) t.classList.add('active');
+    else if (i+1 < n) t.classList.add('done');
+  });
+  if (n === 3) updateSummary();
+}
+
+function toggleSido(sido, el) {
+  if (state.sido.has(sido)) {
+    state.sido.delete(sido); el.classList.remove('on');
+    if (sido === '서울') { document.getElementById('gu-panel').classList.remove('open'); clearGu(); }
+  } else {
+    state.sido.add(sido); el.classList.add('on');
+    if (sido === '서울') document.getElementById('gu-panel').classList.add('open');
+  }
+  update();
+}
+
+function toggleGu(gu, el) {
+  if (state.gu.has(gu)) { state.gu.delete(gu); el.classList.remove('on'); }
+  else { state.gu.add(gu); el.classList.add('on'); }
+  renderGuSelected(); update();
+}
+
+function selectAllGu() {
+  document.querySelectorAll('.gu-chip').forEach(c => { state.gu.add(c.textContent.trim()); c.classList.add('on'); });
+  renderGuSelected(); update();
+}
+
+function clearGu() {
+  state.gu.clear();
+  document.querySelectorAll('.gu-chip').forEach(c => c.classList.remove('on'));
+  renderGuSelected(); update();
+}
+
+function renderGuSelected() {
+  const wrap = document.getElementById('gu-selected-wrap');
+  const badge = document.getElementById('gu-badge');
+  if (state.gu.size === 0) {
+    wrap.innerHTML = '<span style="font-size:11px;color:var(--text3)">없음 (서울 전체)</span>';
+    badge.style.display = 'none';
+  } else {
+    badge.textContent = state.gu.size + '개 선택';
+    badge.style.display = 'inline';
+    wrap.innerHTML = [...state.gu].map(g =>
+      `<span style="font-size:11px;padding:2px 8px;border-radius:8px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);display:inline-flex;align-items:center;gap:3px">${g}<button onclick="removeGu('${g}')" style="background:none;border:none;cursor:pointer;color:var(--green);font-size:12px;padding:0;line-height:1">×</button></span>`
+    ).join('');
+  }
+}
+
+function removeGu(g) {
+  state.gu.delete(g);
+  document.querySelectorAll('.gu-chip').forEach(c => { if (c.textContent.trim()===g) c.classList.remove('on'); });
+  renderGuSelected(); update();
+}
+
+function toggle(el, grp, val) {
+  el.classList.toggle('on');
+  const arr = state[grp];
+  const idx = arr.indexOf(val);
+  if (idx === -1) arr.push(val); else arr.splice(idx,1);
+  if (el.classList.contains('est')) estSet.has(val) ? estSet.delete(val) : estSet.add(val);
+  update();
+}
+
+function clearGroup(grp) {
+  if (grp === 'sido') {
+    state.sido.clear();
+    document.querySelectorAll('.sido-chip').forEach(c => c.classList.remove('on'));
+    document.getElementById('gu-panel').classList.remove('open');
+    clearGu(); update(); return;
+  }
+  state[grp] = [];
+  document.querySelectorAll(`[onclick*=",'${grp}'"]`).forEach(c => c.classList.remove('on'));
+  update();
+}
+
+function selectSvc(svc, el) {
+  state.svc = svc;
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  const m = svcMeta[svc];
+  document.getElementById('prev-icon').style.background = m.color;
+  document.getElementById('prev-icon').textContent = m.icon;
+  document.getElementById('prev-appname').textContent = m.name;
+  document.getElementById('sum-svc').textContent = m.name;
+}
+
+function setTiming(t) {
+  state.timing = t;
+  document.getElementById('timing-now').classList.toggle('on', t==='now');
+  document.getElementById('timing-sched').classList.toggle('on', t==='sched');
+  document.getElementById('sched-fields').style.display = t==='sched' ? 'block' : 'none';
+  if (t==='now') { state.nightBlocked = false; document.getElementById('night-warn').style.display='none'; }
+  update();
+}
+
+function checkNight() {
+  const d = document.getElementById('sched-date').value;
+  const t = document.getElementById('sched-time').value;
+  if (!d || !t) return;
+  const h = parseInt(t.split(':')[0]);
+  state.nightBlocked = h >= 21 || h < 8;
+  document.getElementById('night-warn').style.display = state.nightBlocked ? 'block' : 'none';
+  const dt = new Date(d+'T'+t);
+  document.getElementById('sum-timing').textContent = dt.toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  update();
+}
+
+function onMsgInput() {
+  const t = document.getElementById('msg-title').value;
+  const b = document.getElementById('msg-body').value;
+  document.getElementById('title-cc').textContent = `${t.length} / 50`;
+  document.getElementById('body-cc').textContent = `${b.length} / 100`;
+  document.getElementById('prev-title').textContent = t || '제목을 입력해주세요';
+  document.getElementById('prev-body').textContent = b || '본문을 입력해주세요';
+  const n2 = document.getElementById('next-2');
+  if (n2) n2.disabled = !(t.trim() && b.trim());
+  update();
+}
+
+function estimate() {
+  const all = [...state.basic,...state.want,...state.act,...state.conv];
+  if (all.length===0 && state.sido.size===0) return 0;
+  let base = 1200000;
+  if (state.sido.size) { base *= Math.min(1, state.sido.size * 0.22); if (state.gu.size) base *= Math.min(1, state.gu.size * 0.09); }
+  if (state.basic.length) base *= Math.min(1, state.basic.length * 0.32);
+  if (state.want.length) base *= Math.min(1, state.want.length * 0.28);
+  if (state.act.length) base *= Math.min(1, state.act.length * 0.35);
+  if (state.conv.length) base *= Math.min(1, state.conv.length * 0.22);
+  return Math.max(100, Math.round(base/100)*100);
+}
+
+function buildQuery() {
+  const c = [];
+  if (state.sido.size) {
+    c.push(`  AND current_sido IN (${[...state.sido].map(s=>`'${s}'`).join(', ')})`);
+    if (state.gu.size) c.push(`  AND current_sigungu IN (${[...state.gu].map(g=>`'${g}'`).join(', ')})`);
+  }
+  const g = state.basic.filter(v=>v==='남성'||v==='여성');
+  const a = state.basic.filter(v=>v.includes('대')||v.includes('이상'));
+  if (g.length) c.push(`  AND gender IN (${g.map(v=>`'${v}'`).join(',')})`);
+  if (a.length) c.push(`  AND age_group IN (${a.map(v=>`'${v}'`).join(',')})`);
+  if (state.basic.includes('기혼')) c.push(`  AND marital_status = '기혼'`);
+  if (state.basic.includes('세대주')) c.push(`  AND is_household_head = true`);
+  if (state.basic.includes('자녀 있음')) c.push(`  AND child_count > 0`);
+  if (state.basic.includes('무주택')) c.push(`  AND has_house = false`);
+  const wp = state.want.filter(v=>['아파트','오피스텔','빌라/연립','원룸','신축분양'].includes(v));
+  const wd = state.want.filter(v=>['매매','전세','월세'].includes(v));
+  if (wp.length) c.push(`  AND preferred_property_type IN (${wp.map(v=>`'${v}'`).join(',')})  -- 추정`);
+  if (wd.length) c.push(`  AND preferred_deal_type IN (${wd.map(v=>`'${v}'`).join(',')})  -- 추정`);
+  if (state.want.includes('반려동물 가능')) c.push(`  AND musthave_keywords LIKE '%반려동물%'`);
+  if (state.act.includes('최근 7일 접속')) c.push(`  AND last_visit_date >= CURRENT_DATE - 7`);
+  if (state.act.includes('최근 30일 접속')) c.push(`  AND last_visit_date >= CURRENT_DATE - 30`);
+  if (state.act.includes('30일+ 미접속')) c.push(`  AND last_visit_date < CURRENT_DATE - 30`);
+  if (state.act.includes('찜 1건+')) c.push(`  AND wish_count >= 1`);
+  if (state.act.includes('찜 10건+')) c.push(`  AND wish_count >= 10`);
+  if (state.act.includes('푸시 수신 동의')) c.push(`  AND push_opt_in = true`);
+  if (state.act.includes('마케팅 동의')) c.push(`  AND marketing_opt_in = true`);
+  if (state.act.includes('AI채팅 사용')) c.push(`  AND ai_chat_count > 0`);
+  if (state.act.includes('거주민인증 완료')) c.push(`  AND resident_verified = true`);
+  const crm = state.conv.filter(v=>v.includes('코어')||v.includes('잠재'));
+  if (crm.length) c.push(`  AND app_grade IN (${crm.map(v=>`'${v}'`).join(',')})  -- 추정`);
+  if (state.conv.includes('문의 1건+')) c.push(`  AND total_inquiry >= 1`);
+  if (state.conv.includes('문의 5건+')) c.push(`  AND total_inquiry >= 5`);
+  if (state.conv.includes('최근 30일 문의')) c.push(`  AND last_inquiry_date >= CURRENT_DATE - 30`);
+  const st = state.conv.filter(v=>v.startsWith('단계:'));
+  if (st.length) c.push(`  AND decision_stage IN (${st.map(v=>`'${v.replace('단계:','')}'`).join(',')})  -- 추정`);
+  if (c.length === 0) return '-- 조건을 선택하면\n-- 쿼리가 생성됩니다';
+  return `SELECT DISTINCT user_id\nFROM mart_marketing_target\nWHERE 1=1\n${c.join('\n')}`;
+}
+
+function update() {
+  const cnt = estimate();
+  const all = [...state.basic,...state.want,...state.act,...state.conv];
+  const hasAny = all.length > 0 || state.sido.size > 0;
+
+  document.getElementById('rp-count').textContent = cnt > 0 ? '~' + cnt.toLocaleString() + '명' : '—';
+  document.getElementById('rp-bars').style.display = cnt > 0 ? 'block' : 'none';
+
+  const tagWrap = document.getElementById('rp-tags');
+  let html = '';
+  [...state.sido].forEach(s => {
+    if (s === '서울' && state.gu.size > 0) {
+      html += `<span class="tag tag-green">서울 ${state.gu.size}개구<button class="tag-x" onclick="clearGu()">×</button></span>`;
+    } else {
+      html += `<span class="tag tag-green">${s}<button class="tag-x" onclick="removeSidoTag('${s}')">×</button></span>`;
+    }
+  });
+  all.forEach(v => {
+    const cls = estSet.has(v) ? 'tag-purple' : 'tag-blue';
+    const grp = ['basic','want','act','conv'].find(g => state[g].includes(v));
+    html += `<span class="tag ${cls}">${v}<button class="tag-x" onclick="removeTag('${grp}','${v}')">×</button></span>`;
+  });
+  tagWrap.innerHTML = html || '<span class="empty-tag">없음</span>';
+
+  document.getElementById('rp-query').textContent = buildQuery();
+
+  const n1 = document.getElementById('next-1');
+  if (n1) n1.disabled = !hasAny;
+}
+
+function removeSidoTag(s) {
+  state.sido.delete(s);
+  document.querySelectorAll('.sido-chip').forEach(c => { if (c.textContent.trim()===s) c.classList.remove('on'); });
+  if (s === '서울') { document.getElementById('gu-panel').classList.remove('open'); clearGu(); }
+  update();
+}
+
+function removeTag(grp, val) {
+  const idx = state[grp].indexOf(val);
+  if (idx !== -1) state[grp].splice(idx,1);
+  estSet.delete(val);
+  document.querySelectorAll('.chip.on').forEach(c => { if (c.getAttribute('onclick')?.includes(`'${val}'`)) c.classList.remove('on'); });
+  update();
+}
+
+function updateSummary() {
+  const cnt = estimate();
+  const m = svcMeta[state.svc];
+  const t = document.getElementById('msg-title')?.value || '—';
+  document.getElementById('sum-svc').textContent = m.name;
+  document.getElementById('sum-users').textContent = cnt > 0 ? '~' + cnt.toLocaleString() + '명' : '—';
+  document.getElementById('sum-title').textContent = t;
+  if (state.timing === 'now') document.getElementById('sum-timing').textContent = '즉시';
+
+  const payload = {
+    service: state.svc,
+    user_ids: ['...'],
+    title: t,
+    body: document.getElementById('msg-body')?.value || '',
+    deep_link: document.getElementById('msg-deeplink')?.value || undefined,
+    scheduled_at: state.timing === 'sched' ? (document.getElementById('sched-date').value + 'T' + document.getElementById('sched-time').value) : undefined
+  };
+  Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+  document.getElementById('payload-preview').textContent = JSON.stringify(payload, null, 2);
+}
+
+function sendCampaign() {
+  if (state.nightBlocked) return;
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> 발송 중...';
+
+  const log = document.getElementById('api-log');
+  log.classList.add('show');
+  const cnt = estimate();
+  const m = svcMeta[state.svc];
+  const chunks = Math.ceil(cnt / 1000);
+
+  const lines = [
+    `<span class="log-info">[INFO]</span> POST /internal/marketing/push`,
+    `<span class="log-info">[INFO]</span> service: ${state.svc} | target: ~${cnt.toLocaleString()}명`,
+    `<span class="log-info">[INFO]</span> 배치 분할: ${chunks}개 (1,000명/배치)`,
+  ];
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < Math.min(chunks, 5)) {
+      lines.push(`<span class="log-ok">[OK]</span>  배치 ${i+1}/${Math.min(chunks,5)} — ${Math.min(1000, cnt - i*1000).toLocaleString()}명 전송`);
+      log.innerHTML = lines.join('\n');
+      log.scrollTop = log.scrollHeight;
+      i++;
+    } else {
+      clearInterval(interval);
+      if (chunks > 5) lines.push(`<span class="log-ok">[OK]</span>  ... 총 ${chunks}개 배치 완료`);
+      lines.push(`<span class="log-ok">[DONE]</span> 발송 완료 | ${cnt.toLocaleString()}명 | ${new Date().toLocaleTimeString('ko-KR')}`);
+      log.innerHTML = lines.join('\n');
+      log.scrollTop = log.scrollHeight;
+
+      setTimeout(() => {
+        document.getElementById('res-users').textContent = '~' + cnt.toLocaleString() + '명';
+        document.getElementById('res-svc').textContent = m.name;
+        document.getElementById('res-time').textContent = state.timing === 'now' ? '즉시' : '예약됨';
+        goStep(4);
+        setTimeout(() => {
+          let w = 0;
+          const prog = document.getElementById('result-progress');
+          const label = document.getElementById('result-progress-label');
+          const iv = setInterval(() => {
+            w = Math.min(100, w + 4);
+            prog.style.width = w + '%';
+            label.textContent = `발송 진행률 ${w}%`;
+            if (w >= 100) { clearInterval(iv); label.textContent = '발송 완료 ✓'; }
+          }, 60);
+        }, 400);
+      }, 600);
+    }
+  }, 300);
+}
+
+function resetAll() {
+  Object.assign(state, { sido: new Set(), gu: new Set(), basic:[], want:[], act:[], conv:[], svc:'zigbang', timing:'now', nightBlocked:false });
+  estSet.clear();
+  document.querySelectorAll('.chip.on,.sido-chip.on,.gu-chip.on').forEach(c => c.classList.remove('on'));
+  document.getElementById('gu-panel').classList.remove('open');
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('on'));
+  document.getElementById('svc-zigbang').classList.add('on');
+  document.getElementById('msg-title').value = '';
+  document.getElementById('msg-body').value = '';
+  document.getElementById('msg-deeplink').value = '';
+  document.getElementById('api-log').classList.remove('show');
+  document.getElementById('api-log').innerHTML = '';
+  renderGuSelected();
+  update();
+  goStep(1);
+}
+
+update();
+</script>
+</body>
+</html>
