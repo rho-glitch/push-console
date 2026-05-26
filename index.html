@@ -365,7 +365,7 @@ function switchSvc(s){
   updateSummary();
 }
 
-function applyFilters(s,filters){
+function applyFilters(s, filters){
   Object.keys(sel[s]).forEach(k=>{
     sel[s][k].forEach(v=>{const el=tagMap[s][k][v];if(el)el.classList.remove('on-blue','on-green','on-amber');});
     sel[s][k].clear();
@@ -373,9 +373,11 @@ function applyFilters(s,filters){
   Object.entries(filters).forEach(([k,vals])=>{
     if(!sel[s][k]) return;
     const cfg=DEFS[s].groups[k]; if(!cfg) return;
-    vals.forEach(v=>{
-      sel[s][k].add(v);
-      const el=tagMap[s][k][v]; if(el) el.classList.add('on-'+cfg.color);
+    // 👇 배열이 아니면 배열로 강제 변환
+    const valArr = Array.isArray(vals) ? vals : [vals];
+    valArr.forEach(v=>{
+      sel[s][k].add(String(v));
+      const el=tagMap[s][k][String(v)]; if(el) el.classList.add('on-'+cfg.color);
     });
   });
   updateSummary();
