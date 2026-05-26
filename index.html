@@ -412,6 +412,10 @@ headers:{
     const parsed=JSON.parse(raw.replace(/```(?:json)?|```/g,'').trim());
     if(parsed.csv){csvOn=true;document.getElementById('csv-tog').classList.add('on');}
     const {csv:_,...filterOnly}=parsed;
+    Object.keys(filterOnly).forEach(k=>{
+  if(!Array.isArray(filterOnly[k])) filterOnly[k]=[filterOnly[k]];
+  filterOnly[k]=filterOnly[k].map(String);
+});
     applyFilters(curSvc,filterOnly);
     st.textContent='';
     runQuery();
