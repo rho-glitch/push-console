@@ -392,7 +392,11 @@ async function triggerNL(){
     const filterDesc=Object.entries(def.groups)
       .map(([k,g])=>k+': '+g.opts.map(o=>typeof o==='string'?o:o.v).join(', ')).join('\n');
     const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
+  method:'POST',
+  headers:{
+    'Content-Type':'application/json',
+    'anthropic-dangerous-direct-browser-calls':'true'
+  },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:400,
         system:'한국어 자연어를 push 콘솔 필터 JSON으로 변환하는 파서.\n\n사용 가능 필터:\n'+filterDesc+'\ncsv: true/false\n\nJSON 객체만 반환. 설명 없이.',
