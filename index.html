@@ -141,6 +141,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   display:flex;align-items:center;gap:6px;background:var(--bs)}
 .result-foot a{color:#185FA5;text-decoration:none}
 .result-foot a:hover{text-decoration:underline}
+
+/* 결과 패널 */
+/* ── 결과 패널 ── */
+.result-panel{margin-top:12px;display:flex;flex-direction:column;gap:9px}
+
+/* 상단: 대상자 수 히어로 카드 */
+.res-hero{border-radius:var(--rl);padding:22px 20px 16px;text-align:center}
+.res-hero.done{background:linear-gradient(160deg,#EBF5DF 0%,#E0F0D0 100%);border:0.5px solid #3B6D11}
+.res-hero.loading{background:var(--bs);border:0.5px solid var(--b3)}
+.res-hero.fallback{background:var(--bs);border:0.5px solid var(--b3)}
+.res-hero.error{background:#FCEBEB;border:0.5px solid #F7C1C1}
+.res-num-wrap{display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;line-height:1}
+.res-big-num{font-size:48px;font-weight:700;color:#27500A;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.res-big-num.anim{color:#C5D9B0;animation:resPulse 1.3s ease-in-out infinite}
+@keyframes resPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.res-big-unit{font-size:22px;font-weight:600;color:#3B6D11}
+.res-big-label{font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:7px}
+.res-big-cond{font-size:11px;color:#639922;font-family:'SF Mono','Fira Code',monospace;line-height:1.6;word-break:break-all}
+.res-big-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:13px;padding-top:11px;border-top:0.5px solid rgba(59,109,17,.15)}
+.res-time-lbl{font-size:10px;color:#639922}
+.res-csv-badge{font-size:11px;background:#fff;border:0.5px solid #639922;border-radius:4px;padding:2px 7px;color:#3B6D11}
+.res-copy-num{background:#fff;border:0.5px solid #3B6D11;color:#3B6D11;border-radius:5px;padding:4px 12px;font-size:11px;font-family:inherit;cursor:pointer;transition:all .1s;margin-left:auto}
+.res-copy-num:hover{background:#EAF3DE}
+
+/* 하단: Cube.js 쿼리 */
+.res-query-box{background:#fff;border:0.5px solid var(--b2);border-radius:var(--rm);overflow:hidden}
+.res-query-hd{background:var(--bs);border-bottom:0.5px solid var(--b2);padding:8px 13px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:500;color:var(--ts)}
+.res-query-code{margin:0;padding:10px 13px;font-size:11px;font-family:'SF Mono','Fira Code',monospace;color:var(--ts);line-height:1.7;white-space:pre;overflow-x:auto;background:#fff}
 </style>
 </head>
 <body>
@@ -218,6 +246,47 @@ const SEGS={
 
 let curSvc='zb', csvOn=false;
 const sel={zb:{},hg:{}}, tagMap={zb:{},hg:{}};
+
+/* ── Cube API 설정 ──
+   Claude.ai 조직 설정(Settings > Integrations)의
+   zigbang-gateway MCP URL을 아래에 입력하세요.
+   비워두면 sendPrompt(채팅 전달) 방식으로 대체됩니다. */
+const ZIGBANG_MCP_URL = '';
+
+/* ── 필터 키 → Cube dimension 매핑 ── */
+const CUBE_DIM = {
+  zb: {
+    region:      'zb_user_profile_all.current_local1',
+    gender:      'zb_user_profile_all.gender',
+    age:         'zb_user_profile_all.age_group',
+    lifecycle:   'zb_user_profile_all.lifecycle_stage',
+    crm:         'zb_user_profile_all.apart_crm_grade',
+    property:    'zb_user_profile_all.pref_property_type',
+    transaction: 'zb_user_profile_all.pref_transaction_type',
+    urgency:     'zb_user_profile_all.urgency_level',
+    push:        'zb_user_profile_all.is_push_enabled',
+  },
+  hg: {
+    sex:     'hogangnono_user.sex',
+    ad:      'hogangnono_user.ad',
+    login:   'hogangnono_user.login_type',
+    subtype: 'hogangnono_user.subtype',
+    mobile:  'hogangnono_user.mobile_verified',
+    recency: 'hogangnono_user.recency',
+  }
+};
+
+function buildCubeQuery(svc, selectedFilters) {
+  const cube = DEFS[svc].cube;
+  const dimMap = CUBE_DIM[svc] || {};
+  const filters = [];
+  Object.entries(selectedFilters).forEach(([key, values]) => {
+    if (!dimMap[key] || !values.length) return;
+    const vals = key === 'crm' ? values.map(Number) : values;
+    filters.push({ member: dimMap[key], operator: 'equals', values: vals });
+  });
+  return { measures: [`${cube}.user_count`], filters };
+}
 ['zb','hg'].forEach(s=>Object.keys(DEFS[s].groups).forEach(k=>{sel[s][k]=new Set();tagMap[s][k]={};}));
 
 function mk(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
@@ -321,6 +390,7 @@ function build(){
   root.appendChild(bot);
 
   const sent=mk('div'); sent.id='sent'; root.appendChild(sent);
+  const resPanel=mk('div','result-panel'); resPanel.id='result-panel'; root.appendChild(resPanel);
 }
 
 function switchSvc(s){
@@ -392,6 +462,7 @@ function resetAll(){
     sel[s][k].clear();
   }));
   document.getElementById('sent').innerHTML='';
+  document.getElementById('result-panel').innerHTML='';
   updateSummary();
 }
 
@@ -410,23 +481,122 @@ function updateSummary(){
   bar.innerHTML=chips.length?chips.join(''):'<span class="empty-msg">필터를 선택하면 여기에 표시됩니다</span>';
 }
 
-function runQuery(){
+async function runQuery(){
   const s=curSvc,def=DEFS[s].groups,filters={};
-  Object.entries(def).forEach(([k])=>{if(sel[s][k].size)filters[k]=[...sel[s][k]];});
+  Object.entries(def).forEach(([k])=>{ if(sel[s][k].size) filters[k]=[...sel[s][k]]; });
   const parts=Object.entries(filters).map(([k,vals])=>{
     const cfg=def[k];
     const lbls=vals.map(v=>{const o=cfg.opts.find(x=>(typeof x==='string'?x:x.v)===v);return typeof o==='string'?o:(o?o.l:v);});
     return cfg.label+': '+lbls.join(', ');
   });
   const condStr=parts.length?parts.join(' / '):'전체 (필터 없음)';
-  const payload={service:s,cube:DEFS[s].cube,csv:csvOn,filters};
-  document.getElementById('sent').innerHTML=
-    '<div style="margin-top:10px;background:#EAF3DE;border:0.5px solid #639922;border-radius:8px;padding:9px 12px"><div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:2px">📤 조회 요청 전송됨'+(csvOn?' · CSV 포함':'')+'</div><div style="font-size:11px;color:#639922;font-family:monospace;line-height:1.5">'+condStr+'</div></div>';
+  const cubeQuery=buildCubeQuery(s,filters);
+  const rp=document.getElementById('result-panel');
+  document.getElementById('sent').innerHTML='';
   const btn=document.getElementById('btn-q');
-  btn.disabled=true; setTimeout(()=>{btn.disabled=false;},3000);
-  if(typeof sendPrompt==='function'){
-    sendPrompt('__CUBE_QUERY__ '+JSON.stringify(payload)+'\n조건: '+condStr+(csvOn?' [CSV 다운로드 포함]':''));
+  btn.disabled=true;
+  /* 쿼리 즉시 표시 + 상단 로딩 */
+  rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'loading');
+  try{
+    if(ZIGBANG_MCP_URL){
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',max_tokens:1000,
+          system:`당신은 Cube.js 쿼리 실행 에이전트입니다.
+주어진 Cube.js JSON 쿼리를 de-cube-mcp의 run_cube_query 도구로 실행하고,
+결과에서 user_count 숫자를 추출하여 아래 JSON 형식으로만 반환하세요.
+다른 텍스트 없이 JSON만: {"user_count":NUMBER}`,
+          messages:[{role:'user',content:JSON.stringify(cubeQuery)}],
+          mcp_servers:[{type:'url',url:ZIGBANG_MCP_URL,name:'zigbang-gateway'}]
+        })
+      });
+      const data=await resp.json();
+      let userCount=null;
+      const toolResults=(data.content||[]).filter(c=>c.type==='mcp_tool_result').map(c=>c.content?.[0]?.text||'');
+      for(const t of toolResults){
+        try{const p=JSON.parse(t);const key=`${DEFS[s].cube}.user_count`;if(p.data?.[0]?.[key]!==undefined){userCount=Number(p.data[0][key]);break;}}catch(_){}
+      }
+      if(userCount===null){
+        const txt=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
+        try{userCount=JSON.parse(txt.replace(/```json?|```/g,'').trim()).user_count;}catch(_){}
+      }
+      if(userCount===null) throw new Error('응답에서 user_count를 찾을 수 없습니다');
+      rp.innerHTML=buildResultHTML(userCount,condStr,cubeQuery,csvOn,'done');
+    } else {
+      if(typeof sendPrompt==='function'){
+        sendPrompt(`__CUBE_QUERY__ ${JSON.stringify({service:s,cube:DEFS[s].cube,cubeQuery,csv:csvOn})}
+조건: ${condStr}${csvOn?' [CSV 포함]':''}`);
+      }
+      rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'fallback');
+      setTimeout(()=>{ btn.disabled=false; },2000);
+      return;
+    }
+  }catch(e){
+    rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'error',e.message);
+  }finally{
+    btn.disabled=false;
   }
+}
+
+function buildResultHTML(count,condStr,cubeQuery,csv,state,errMsg){
+  const qJson=JSON.stringify(cubeQuery,null,2);
+  window._zbQueryStr=qJson;
+  const qEsc=qJson.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let hero='';
+  if(state==='loading'){
+    hero=`
+      <div class="res-num-wrap">
+        <span class="res-big-num anim">—</span>
+        <span class="res-big-unit" style="color:var(--b1)">명</span>
+      </div>
+      <div class="res-big-label" style="color:var(--tt)">조회 중…</div>
+      <div class="res-big-cond" style="color:var(--b2)">${condStr}</div>`;
+  } else if(state==='done'){
+    const fmt=count.toLocaleString('ko-KR');
+    const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+    hero=`
+      <div class="res-num-wrap">
+        <span class="res-big-num">${fmt}</span>
+        <span class="res-big-unit">명</span>
+      </div>
+      <div class="res-big-label">푸시 발송 가능 대상</div>
+      <div class="res-big-cond">${condStr}</div>
+      <div class="res-big-footer">
+        <span class="res-time-lbl">${now} 기준</span>
+        ${csv?'<span class="res-csv-badge">📥 CSV 포함</span>':''}
+        <button class="res-copy-num" data-n="${count}"
+          onclick="navigator.clipboard.writeText(this.dataset.n).catch(()=>{});
+                   const p=this.textContent;this.textContent='✓ 복사됨';
+                   setTimeout(()=>this.textContent=p,2000)">📋 수 복사</button>
+      </div>`;
+  } else if(state==='fallback'){
+    hero=`
+      <div class="res-num-wrap">
+        <span style="font-size:36px;color:var(--b1);letter-spacing:-1px">?,???</span>
+        <span class="res-big-unit" style="color:var(--b1)">명</span>
+      </div>
+      <div class="res-big-label" style="color:var(--ts)">채팅에서 결과 확인</div>
+      <div class="res-big-cond">${condStr}</div>`;
+  } else if(state==='error'){
+    hero=`
+      <div style="font-size:26px;margin-bottom:6px">❌</div>
+      <div class="res-big-label" style="color:#A32D2D">조회 실패</div>
+      <div style="font-size:11px;color:#A32D2D;margin-top:4px">${errMsg||''}</div>`;
+  }
+  return `
+    <div class="res-hero ${state}">${hero}</div>
+    <div class="res-query-box">
+      <div class="res-query-hd">
+        <span>⚡ Cube.js 쿼리</span>
+        <button class="copy-btn"
+          onclick="navigator.clipboard.writeText(window._zbQueryStr).catch(()=>{});
+                   this.textContent='✓ 복사됨';this.classList.add('ok');
+                   setTimeout(()=>{this.textContent='📋 복사';this.classList.remove('ok')},2000)">
+          📋 복사</button>
+      </div>
+      <pre class="res-query-code">${qEsc}</pre>
+    </div>`;
 }
 
 build();
