@@ -31,7 +31,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;
   color:var(--ts);transition:all .15s;display:flex;align-items:center;
   justify-content:center;gap:6px}
-.svc-tab-logo{height:22px;width:auto;object-fit:contain;vertical-align:middle}
 .tab-zb-on{background:#fff;color:#185FA5;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .tab-hg-on{background:#fff;color:#3B6D11;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
@@ -121,7 +120,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .btn-q.hg{background:#3B6D11}.btn-q.hg:hover{background:#27500A}
 .btn-q:disabled{opacity:.45;cursor:not-allowed}
 
-/* 결과 박스 */
+/* 결과 박스 (레거시) */
 .result-box{margin-top:12px;border:0.5px solid var(--b2);
   border-radius:var(--rm);overflow:hidden}
 .result-hd{background:var(--bs);border-bottom:0.5px solid var(--b2);
@@ -143,7 +142,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .result-foot a:hover{text-decoration:underline}
 
 /* 결과 패널 */
-/* ── 결과 패널 ── */
 .result-panel{margin-top:12px;display:flex;flex-direction:column;gap:9px}
 
 /* 상단: 대상자 수 히어로 카드 */
@@ -183,26 +181,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 
 <script>
-/* ── 이모지 맵 (Tabler 아이콘 대체) ── */
-const EMOJI = {
-  'ti ti-home':         '🏠',
-  'ti ti-search':       '🔍',
-  'ti ti-arrow-right':  '▶',
-  'ti ti-flame':        '🔥',
-  'ti ti-bell':         '🔔',
-  'ti ti-refresh':      '🔄',
-  'ti ti-leaf':         '🌱',
-  'ti ti-bolt':         '⚡',
-  'ti ti-building':     '🏢',
-  'ti ti-map-pin':      '📍',
-  'ti ti-check':        '✅',
-  'ti ti-message':      '💬',
-  'ti ti-trending-up':  '📈',
-  'ti ti-send':         '📤',
-  'ti ti-clipboard-copy':'📋',
-  'ti ti-copy':         '📋',
-};
-
 const DEFS={
   zb:{cube:'zb_user_profile_all',groups:{
     region:     {color:'blue', label:'거주지역',    opts:['서울특별시','경기도','인천광역시','부산광역시','대구광역시','대전광역시','광주광역시','울산광역시','세종특별자치시','강원도','충청북도','충청남도','전라북도','전라남도','경상북도','경상남도','제주특별자치도']},
@@ -247,13 +225,9 @@ const SEGS={
 let curSvc='zb', csvOn=false;
 const sel={zb:{},hg:{}}, tagMap={zb:{},hg:{}};
 
-/* ── Cube API 설정 ──
-   Claude.ai 조직 설정(Settings > Integrations)의
-   zigbang-gateway MCP URL을 아래에 입력하세요.
-   비워두면 sendPrompt(채팅 전달) 방식으로 대체됩니다. */
-const ZIGBANG_MCP_URL = '';
+/* Cube API 설정 - MCP URL을 입력하면 직접 조회, 비워두면 채팅 전달 방식 사용 */
+const ZIGBANG_MCP_URL = 'https://mcp-gw.zigbang.io/';
 
-/* ── 필터 키 → Cube dimension 매핑 ── */
 const CUBE_DIM = {
   zb: {
     region:      'zb_user_profile_all.current_local1',
@@ -287,6 +261,7 @@ function buildCubeQuery(svc, selectedFilters) {
   });
   return { measures: [`${cube}.user_count`], filters };
 }
+
 ['zb','hg'].forEach(s=>Object.keys(DEFS[s].groups).forEach(k=>{sel[s][k]=new Set();tagMap[s][k]={};}));
 
 function mk(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
@@ -420,40 +395,57 @@ function applyFilters(s,filters){
   updateSummary();
 }
 
-async function triggerNL(){
+function parseNLLocal(text,svc){
+  const def=DEFS[svc].groups;
+  const result={};
+  Object.entries(def).forEach(([key,cfg])=>{
+    cfg.opts.map(o=>typeof o==='string'?{l:o,v:o}:o).forEach(({l,v})=>{
+      if(text.includes(l)||(v!==l&&text.includes(v))){
+        if(!result[key]) result[key]=[];
+        if(!result[key].includes(v)) result[key].push(v);
+      }
+    });
+  });
+  const aliases={
+    zb:{
+      lifecycle:{'활성':['active'],'비활성':['inactive'],'신규':['nru']},
+      push:{'푸시허용':['허용'],'알림허용':['허용']},
+      age:{'30·40대':['30대','40대'],'30대40대':['30대','40대'],'2030':['20대','30대']},
+    },
+    hg:{
+      ad:{'마케팅동의':['1'],'동의':['1']},
+      mobile:{'인증완료':['1'],'인증':['1']},
+    }
+  };
+  const al=aliases[svc]||{};
+  Object.entries(al).forEach(([key,map])=>{
+    Object.entries(map).forEach(([alias,vals])=>{
+      if(text.includes(alias)){
+        if(!result[key]) result[key]=[];
+        vals.forEach(v=>{ if(!result[key].includes(v)) result[key].push(v); });
+      }
+    });
+  });
+  const hasCsv=['csv','CSV','추출','다운로드','리스트','명단'].some(k=>text.includes(k));
+  return {filters:result, csv:hasCsv};
+}
+
+function triggerNL(){
   const text=document.getElementById('nl-in').value.trim();
   if(!text) return;
-  const btn=document.getElementById('nl-btn');
   const st=document.getElementById('nl-st');
-  btn.disabled=true; st.className='nl-status'; st.textContent='분석 중...';
-  try{
-    const def=DEFS[curSvc];
-    const filterDesc=Object.entries(def.groups)
-      .map(([k,g])=>k+': '+g.opts.map(o=>typeof o==='string'?o:o.v).join(', ')).join('\n');
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:400,
-        system:'한국어 자연어를 push 콘솔 필터 JSON으로 변환하는 파서.\n\n사용 가능 필터:\n'+filterDesc+'\ncsv: true/false (CSV 다운로드 여부)\n\nJSON 객체만 반환. 설명 없이.',
-        messages:[{role:'user',content:text}]
-      })
-    });
-    const data=await res.json();
-    const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
-    const parsed=JSON.parse(raw.replace(/```(?:json)?|```/g,'').trim());
-    if(parsed.csv){csvOn=true;document.getElementById('csv-tog').classList.add('on');}
-    const {csv:_,...filterOnly}=parsed;
-    // 값이 문자열/숫자로 올 경우 배열로 정규화
-    Object.keys(filterOnly).forEach(k=>{
-      if(!Array.isArray(filterOnly[k])) filterOnly[k]=[String(filterOnly[k])];
-      else filterOnly[k]=filterOnly[k].map(String);
-    });
-    applyFilters(curSvc,filterOnly);
-    st.textContent='';
-    runQuery();
-  }catch(e){
-    st.className='nl-status err'; st.textContent='분석 실패 — '+e.message;
-  }finally{btn.disabled=false;}
+  st.className='nl-status';
+  const {filters,csv}=parseNLLocal(text,curSvc);
+  const matchCount=Object.values(filters).reduce((s,v)=>s+v.length,0);
+  if(matchCount===0){
+    st.className='nl-status err';
+    st.textContent='일치하는 필터가 없습니다. 직접 태그를 선택해 주세요.';
+    return;
+  }
+  if(csv){csvOn=true;document.getElementById('csv-tog').classList.add('on');}
+  applyFilters(curSvc,filters);
+  st.textContent=matchCount+'개 조건 인식됨';
+  runQuery();
 }
 
 function resetAll(){
@@ -481,7 +473,7 @@ function updateSummary(){
   bar.innerHTML=chips.length?chips.join(''):'<span class="empty-msg">필터를 선택하면 여기에 표시됩니다</span>';
 }
 
-async function runQuery(){
+function runQuery(){
   const s=curSvc,def=DEFS[s].groups,filters={};
   Object.entries(def).forEach(([k])=>{ if(sel[s][k].size) filters[k]=[...sel[s][k]]; });
   const parts=Object.entries(filters).map(([k,vals])=>{
@@ -493,49 +485,18 @@ async function runQuery(){
   const cubeQuery=buildCubeQuery(s,filters);
   const rp=document.getElementById('result-panel');
   document.getElementById('sent').innerHTML='';
-  const btn=document.getElementById('btn-q');
-  btn.disabled=true;
-  /* 쿼리 즉시 표시 + 상단 로딩 */
-  rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'loading');
-  try{
-    if(ZIGBANG_MCP_URL){
-      const resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',max_tokens:1000,
-          system:`당신은 Cube.js 쿼리 실행 에이전트입니다.
-주어진 Cube.js JSON 쿼리를 de-cube-mcp의 run_cube_query 도구로 실행하고,
-결과에서 user_count 숫자를 추출하여 아래 JSON 형식으로만 반환하세요.
-다른 텍스트 없이 JSON만: {"user_count":NUMBER}`,
-          messages:[{role:'user',content:JSON.stringify(cubeQuery)}],
-          mcp_servers:[{type:'url',url:ZIGBANG_MCP_URL,name:'zigbang-gateway'}]
-        })
-      });
-      const data=await resp.json();
-      let userCount=null;
-      const toolResults=(data.content||[]).filter(c=>c.type==='mcp_tool_result').map(c=>c.content?.[0]?.text||'');
-      for(const t of toolResults){
-        try{const p=JSON.parse(t);const key=`${DEFS[s].cube}.user_count`;if(p.data?.[0]?.[key]!==undefined){userCount=Number(p.data[0][key]);break;}}catch(_){}
-      }
-      if(userCount===null){
-        const txt=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
-        try{userCount=JSON.parse(txt.replace(/```json?|```/g,'').trim()).user_count;}catch(_){}
-      }
-      if(userCount===null) throw new Error('응답에서 user_count를 찾을 수 없습니다');
-      rp.innerHTML=buildResultHTML(userCount,condStr,cubeQuery,csvOn,'done');
-    } else {
-      if(typeof sendPrompt==='function'){
-        sendPrompt(`__CUBE_QUERY__ ${JSON.stringify({service:s,cube:DEFS[s].cube,cubeQuery,csv:csvOn})}
-조건: ${condStr}${csvOn?' [CSV 포함]':''}`);
-      }
-      rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'fallback');
-      setTimeout(()=>{ btn.disabled=false; },2000);
-      return;
-    }
-  }catch(e){
-    rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'error',e.message);
-  }finally{
-    btn.disabled=false;
+  rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'fallback');
+  /* sendPrompt로 Claude 채팅에 MCP 실행 위임 */
+  if(typeof sendPrompt==='function'){
+    const prompt=`아래 Cube.js 쿼리를 zigbang-gateway MCP의 de-cube-mcp__run_cube_query 도구로 실행하고, 결과의 user_count 숫자만 간단히 알려주세요.
+
+서비스: ${s} (cube: ${DEFS[s].cube})
+조건: ${condStr}${csvOn?' [CSV 포함]':''}
+
+\`\`\`json
+${JSON.stringify(cubeQuery,null,2)}
+\`\`\``;
+    sendPrompt(prompt);
   }
 }
 
@@ -576,7 +537,7 @@ function buildResultHTML(count,condStr,cubeQuery,csv,state,errMsg){
         <span style="font-size:36px;color:var(--b1);letter-spacing:-1px">?,???</span>
         <span class="res-big-unit" style="color:var(--b1)">명</span>
       </div>
-      <div class="res-big-label" style="color:var(--ts)">채팅에서 결과 확인</div>
+      <div class="res-big-label" style="color:var(--ts)">⬆ 위 채팅에서 결과 확인</div>
       <div class="res-big-cond">${condStr}</div>`;
   } else if(state==='error'){
     hero=`
