@@ -228,6 +228,12 @@ const sel={zb:{},hg:{}}, tagMap={zb:{},hg:{}};
 /* Cube API 설정 - MCP URL을 입력하면 직접 조회, 비워두면 채팅 전달 방식 사용 */
 const ZIGBANG_MCP_URL = 'https://mcp-gw.zigbang.io/';
 
+// [FIX] CSV 추출용 user_no dimension
+const CSV_DIM = {
+  zb: 'zb_user_profile_all.user_no',
+  hg: 'hogangnono_user.user_no',
+};
+
 const CUBE_DIM = {
   zb: {
     region:      'zb_user_profile_all.current_local1',
@@ -249,6 +255,17 @@ const CUBE_DIM = {
     recency: 'hogangnono_user.recency',
   }
 };
+
+function buildCsvQuery(svc, selectedFilters) {
+  const dimMap = CUBE_DIM[svc] || {};
+  const filters = [];
+  Object.entries(selectedFilters).forEach(([key, values]) => {
+    if (!dimMap[key] || !values.length) return;
+    const vals = key === 'crm' ? values.map(Number) : values;
+    filters.push({ member: dimMap[key], operator: 'equals', values: vals });
+  });
+  return { dimensions: [CSV_DIM[svc]], filters, limit: 50000 };
+}
 
 function buildCubeQuery(svc, selectedFilters) {
   const cube = DEFS[svc].cube;
@@ -453,9 +470,30 @@ function resetAll(){
     sel[s][k].forEach(v=>{const el=tagMap[s][k][v];if(el)el.classList.remove('on-blue','on-green','on-amber');});
     sel[s][k].clear();
   }));
+  window._zbCsvMeta=null;
   document.getElementById('sent').innerHTML='';
   document.getElementById('result-panel').innerHTML='';
   updateSummary();
+}
+
+// [FIX] CSV 다운로드: user_no dimension 쿼리를 Claude에 위임
+function requestCsvDownload(){
+  const meta=window._zbCsvMeta;
+  if(!meta){alert('먼저 대상 유저를 조회해 주세요.');return;}
+  const btn=document.getElementById('csv-dl-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ 요청 중…';}
+  if(typeof sendPrompt==='function'){
+    const prompt=`아래 Cube.js 쿼리를 zigbang-gateway MCP의 de-cube-mcp__run_cube_query 도구로 실행하고, 결과 user_no 목록을 CSV 파일(파일명: push_target.csv, 헤더: user_no)로 만들어 다운로드할 수 있게 제공해주세요.
+
+서비스: ${meta.svc}
+조건: ${meta.condStr}
+
+\`\`\`json
+${JSON.stringify(meta.cubeQuery,null,2)}
+\`\`\``;
+    sendPrompt(prompt);
+  }
+  setTimeout(()=>{if(btn){btn.disabled=false;btn.textContent='📥 CSV 다운로드';}},3000);
 }
 
 function updateSummary(){
@@ -483,6 +521,8 @@ function runQuery(){
   });
   const condStr=parts.length?parts.join(' / '):'전체 (필터 없음)';
   const cubeQuery=buildCubeQuery(s,filters);
+  // [FIX] CSV 다운로드 버튼에서 참조할 메타 전역 저장
+  window._zbCsvMeta={ svc:s, condStr, cubeQuery: buildCsvQuery(s,filters) };
   const rp=document.getElementById('result-panel');
   document.getElementById('sent').innerHTML='';
   rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'fallback');
@@ -504,6 +544,16 @@ function buildResultHTML(count,condStr,cubeQuery,csv,state,errMsg){
   const qJson=JSON.stringify(cubeQuery,null,2);
   window._zbQueryStr=qJson;
   const qEsc=qJson.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // [FIX] CSV 버튼 (csv=true일 때 fallback·done 모두 노출)
+  const csvBar=csv?`
+    <div style="display:flex;align-items:center;gap:8px;margin-top:11px;padding-top:11px;border-top:0.5px solid var(--b3)">
+      <button id="csv-dl-btn" onclick="requestCsvDownload()"
+        style="display:flex;align-items:center;gap:6px;background:${state==='done'?'#3B6D11':'var(--bs)'};
+               color:${state==='done'?'#fff':'var(--ts)'};border:0.5px solid ${state==='done'?'#3B6D11':'var(--b2)'};
+               border-radius:var(--rm);padding:8px 16px;font-size:12px;font-weight:500;
+               font-family:inherit;cursor:pointer">📥 CSV 다운로드</button>
+      <span style="font-size:11px;color:var(--tt)">위 채팅에서 user_count 확인 후 클릭하세요</span>
+    </div>`:'';
   let hero='';
   if(state==='loading'){
     hero=`
@@ -525,12 +575,12 @@ function buildResultHTML(count,condStr,cubeQuery,csv,state,errMsg){
       <div class="res-big-cond">${condStr}</div>
       <div class="res-big-footer">
         <span class="res-time-lbl">${now} 기준</span>
-        ${csv?'<span class="res-csv-badge">📥 CSV 포함</span>':''}
         <button class="res-copy-num" data-n="${count}"
           onclick="navigator.clipboard.writeText(this.dataset.n).catch(()=>{});
                    const p=this.textContent;this.textContent='✓ 복사됨';
                    setTimeout(()=>this.textContent=p,2000)">📋 수 복사</button>
-      </div>`;
+      </div>
+      ${csvBar}`;
   } else if(state==='fallback'){
     hero=`
       <div class="res-num-wrap">
@@ -538,7 +588,8 @@ function buildResultHTML(count,condStr,cubeQuery,csv,state,errMsg){
         <span class="res-big-unit" style="color:var(--b1)">명</span>
       </div>
       <div class="res-big-label" style="color:var(--ts)">⬆ 위 채팅에서 결과 확인</div>
-      <div class="res-big-cond">${condStr}</div>`;
+      <div class="res-big-cond">${condStr}</div>
+      ${csvBar}`;
   } else if(state==='error'){
     hero=`
       <div style="font-size:26px;margin-bottom:6px">❌</div>
