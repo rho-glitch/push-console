@@ -1,184 +1,63 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>직방 푸시 콘솔</title>
+
 <style>
-:root {
-  --tp: #1a1a1a; --ts: #6b7280; --tt: #9ca3af;
-  --bp: #ffffff; --bs: #f7f7f8;
-  --b1: #d1d5db; --b2: #e5e7eb; --b3: #efefef;
-  --rm: 8px; --rl: 12px;
-}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
-  background:#fff;color:var(--tp);font-size:14px;min-height:100vh}
-.page-wrap{max-width:760px;margin:0 auto;padding:20px 20px 40px}
-
-/* 헤더 */
-.page-header{display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:20px;padding-bottom:14px;
-  border-bottom:1px solid var(--b3)}
-.page-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
-.page-badge{font-size:11px;background:#EAF3DE;color:#3B6D11;
-  border-radius:20px;padding:2px 9px;font-weight:500}
-
-/* 서비스 탭 */
-.svc-tabs{display:flex;gap:4px;background:var(--bs);border-radius:var(--rm);
-  padding:3px;margin-bottom:14px;border:1px solid var(--b3)}
-.svc-tab{flex:1;padding:8px 6px;border:none;background:transparent;border-radius:7px;
-  font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;
-  color:var(--ts);transition:all .15s;display:flex;align-items:center;
-  justify-content:center;gap:6px}
-.tab-zb-on{background:#fff;color:#185FA5;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.tab-hg-on{background:#fff;color:#3B6D11;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-
-/* NL 입력 */
+body{font-family:system-ui,sans-serif;background:transparent;color:var(--color-text-primary);padding:16px;font-size:14px}
+.svc-tabs{display:flex;gap:4px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:3px;margin-bottom:14px}
+.svc-tab{flex:1;padding:7px;border:none;background:transparent;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--color-text-secondary);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.tab-zb-on{background:var(--color-background-primary);color:#185FA5;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tab-hg-on{background:var(--color-background-primary);color:#3B6D11;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .nl-wrap{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
-.nl-input{flex:1;border:0.5px solid var(--b2);border-radius:var(--rm);
-  padding:9px 12px;font-size:13px;font-family:inherit;background:#fff;
-  color:var(--tp);outline:none;resize:none;line-height:1.5;
-  min-height:38px;max-height:80px}
-.nl-input:focus{border-color:#378ADD;box-shadow:0 0 0 2px #E6F1FB}
-.nl-input::placeholder{color:var(--tt)}
-.nl-btn{border:0.5px solid #378ADD;background:#E6F1FB;color:#185FA5;
-  border-radius:var(--rm);padding:9px 14px;font-size:13px;font-weight:500;
-  font-family:inherit;cursor:pointer;white-space:nowrap;display:flex;
-  align-items:center;gap:5px;flex-shrink:0;transition:all .12s}
+.nl-input{flex:1;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:9px 12px;font-size:13px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;resize:none;line-height:1.5;min-height:38px;max-height:80px}
+.nl-input:focus{border-color:#378ADD}
+.nl-input::placeholder{color:var(--color-text-tertiary)}
+.nl-btn{border:0.5px solid #378ADD;background:#E6F1FB;color:#185FA5;border-radius:var(--border-radius-md);padding:9px 14px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;flex-shrink:0;transition:all .12s}
 .nl-btn:hover{background:#B5D4F4}
 .nl-btn:disabled{opacity:.45;cursor:not-allowed}
-.nl-status{font-size:12px;color:var(--tt);margin-bottom:10px;min-height:18px}
-.nl-status.err{color:#A32D2D;background:#FCEBEB;border:0.5px solid #F7C1C1;
-  border-radius:var(--rm);padding:6px 10px}
-
-/* 세그먼트 */
-.sec-lbl{font-size:10px;font-weight:500;color:var(--tt);text-transform:uppercase;
-  letter-spacing:.08em;margin-bottom:8px}
+.nl-status{font-size:12px;color:var(--color-text-tertiary);margin-bottom:10px;min-height:18px}
+.nl-status.err{color:#A32D2D;background:#FCEBEB;border:0.5px solid #F7C1C1;border-radius:var(--border-radius-md);padding:6px 10px}
+.sec-lbl{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 .segs-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-.seg{background:#fff;border:0.5px solid var(--b2);border-radius:var(--rm);
-  padding:7px 11px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;
-  text-align:left;font-family:inherit;transition:all .12s}
-.seg:hover{border-color:var(--b1);background:var(--bs)}
-.seg-ico{font-size:16px;line-height:1;margin-top:1px}
+.seg{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 11px;cursor:pointer;display:flex;align-items:flex-start;gap:7px;text-align:left;font-family:inherit;transition:all .12s}
+.seg:hover{border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.seg-ico{font-size:15px;line-height:1;margin-top:1px}
 .seg-nm{font-size:12px;font-weight:500;line-height:1.3}
-.seg-ds{font-size:11px;color:var(--tt);margin-top:2px;line-height:1.3}
-.seg.a-amber .seg-nm{color:#633806}
-.seg.a-blue  .seg-nm{color:#0C447C}
-.seg.a-green .seg-nm{color:#27500A}
-
-/* 구분선 */
+.seg-ds{font-size:11px;color:var(--color-text-tertiary);margin-top:2px;line-height:1.3}
+.seg.a-amber .seg-ico{color:#BA7517}.seg.a-amber .seg-nm{color:#633806}
+.seg.a-blue  .seg-ico{color:#185FA5}.seg.a-blue  .seg-nm{color:#0C447C}
+.seg.a-green .seg-ico{color:#3B6D11}.seg.a-green .seg-nm{color:#27500A}
 .divider{display:flex;align-items:center;gap:10px;margin:12px 0 10px}
-.dline{flex:1;border-top:0.5px solid var(--b3)}
-.dtxt{font-size:11px;color:var(--tt);white-space:nowrap}
-
-/* 필터 그리드 */
+.dline{flex:1;border-top:0.5px solid var(--color-border-tertiary)}
+.dtxt{font-size:11px;color:var(--color-text-tertiary);white-space:nowrap}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
-.card{background:var(--bs);border:0.5px solid var(--b3);
-  border-radius:var(--rl);padding:11px 13px}
-.clabel{font-size:10px;font-weight:500;color:var(--tt);text-transform:uppercase;
-  letter-spacing:.08em;margin-bottom:7px;display:block}
+.card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:11px 13px}
+.clabel{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;display:block}
 .clabel+.clabel{margin-top:9px}
 .tags{display:flex;flex-wrap:wrap;gap:4px}
-.tag{background:#fff;border:0.5px solid var(--b2);color:var(--ts);
-  border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer;
-  user-select:none;-webkit-user-select:none;transition:all .1s}
-.tag:hover{border-color:var(--b1)}
+.tag{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:all .1s}
 .tag.on-blue  {background:#E6F1FB;border-color:#378ADD;color:#0C447C}
 .tag.on-green {background:#EAF3DE;border-color:#3B6D11;color:#27500A}
 .tag.on-amber {background:#FAEEDA;border-color:#BA7517;color:#633806}
-
-/* 칩 바 */
-.chips-bar{min-height:30px;background:var(--bs);border:0.5px solid var(--b3);
-  border-radius:var(--rm);padding:5px 10px;display:flex;flex-wrap:wrap;
-  gap:5px;align-items:center;margin-bottom:10px}
-.chip{background:#fff;border:0.5px solid var(--b2);border-radius:4px;
-  padding:2px 7px;font-size:11px;color:var(--ts)}
-.empty-msg{font-size:11px;color:var(--tt)}
-
-/* 액션바 */
+.chips-bar{min-height:30px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:5px 10px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:10px}
+.chip{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--color-text-secondary)}
+.empty-msg{font-size:11px;color:var(--color-text-tertiary)}
 .bot{display:flex;align-items:center;gap:8px}
-.cnt-lbl{font-size:11px;color:var(--tt);flex-shrink:0;min-width:48px}
-.csv-tog{display:flex;align-items:center;gap:5px;padding:8px 11px;
-  border:0.5px solid var(--b2);border-radius:var(--rm);cursor:pointer;
-  background:var(--bs);flex-shrink:0;user-select:none;transition:all .12s}
+.cnt-lbl{font-size:11px;color:var(--color-text-tertiary);flex-shrink:0;min-width:48px}
+.csv-tog{display:flex;align-items:center;gap:5px;padding:8px 11px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-secondary);flex-shrink:0;user-select:none;transition:all .12s}
 .csv-tog.on{background:#EAF3DE;border-color:#3B6D11}
-.cb{width:13px;height:13px;border-radius:3px;border:0.5px solid var(--b1);
-  background:#fff;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-size:9px;font-weight:500;color:transparent;transition:all .12s}
+.cb{width:13px;height:13px;border-radius:3px;border:0.5px solid var(--color-border-primary);background:var(--color-background-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:500;color:transparent;transition:all .12s}
 .csv-tog.on .cb{background:#3B6D11;border-color:#3B6D11;color:#fff}
-.cb-l{font-size:12px;color:var(--ts)}
+.cb-l{font-size:12px;color:var(--color-text-secondary)}
 .csv-tog.on .cb-l{color:#27500A}
-.btn-rst{background:var(--bs);border:0.5px solid var(--b2);color:var(--ts);
-  border-radius:var(--rm);padding:8px 13px;font-size:12px;font-family:inherit;
-  cursor:pointer;flex-shrink:0;transition:all .12s}
-.btn-rst:hover{border-color:var(--b1);color:var(--tp)}
-.btn-q{flex:1;border:none;color:#fff;border-radius:var(--rm);padding:9px 16px;
-  font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
-.btn-q.zb{background:#185FA5}.btn-q.zb:hover{background:#0C447C}
-.btn-q.hg{background:#3B6D11}.btn-q.hg:hover{background:#27500A}
+.btn-rst{background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:var(--border-radius-md);padding:8px 13px;font-size:12px;font-family:inherit;cursor:pointer;flex-shrink:0}
+.btn-q{flex:1;border:none;color:#fff;border-radius:var(--border-radius-md);padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-q.zb{background:#185FA5}.btn-q.hg{background:#3B6D11}
 .btn-q:disabled{opacity:.45;cursor:not-allowed}
-
-/* 결과 박스 (레거시) */
-.result-box{margin-top:12px;border:0.5px solid var(--b2);
-  border-radius:var(--rm);overflow:hidden}
-.result-hd{background:var(--bs);border-bottom:0.5px solid var(--b2);
-  padding:9px 13px;display:flex;align-items:center;justify-content:space-between}
-.result-hd-title{font-size:12px;font-weight:500;color:var(--ts);
-  display:flex;align-items:center;gap:6px}
-.copy-btn{background:#fff;border:0.5px solid var(--b2);color:var(--ts);
-  border-radius:5px;padding:3px 10px;font-size:11px;font-family:inherit;
-  cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .1s}
-.copy-btn:hover{border-color:#378ADD;color:#185FA5}
-.copy-btn.ok{background:#EAF3DE;border-color:#3B6D11;color:#3B6D11}
-.query-ta{width:100%;border:none;outline:none;resize:none;padding:10px 13px;
-  font-size:11px;font-family:'SF Mono','Fira Code',monospace;background:#fff;
-  color:var(--ts);line-height:1.7;min-height:64px;
-  border-bottom:0.5px solid var(--b3)}
-.result-foot{padding:8px 13px;font-size:11px;color:var(--tt);
-  display:flex;align-items:center;gap:6px;background:var(--bs)}
-.result-foot a{color:#185FA5;text-decoration:none}
-.result-foot a:hover{text-decoration:underline}
-
-/* 결과 패널 */
-.result-panel{margin-top:12px;display:flex;flex-direction:column;gap:9px}
-
-/* 상단: 대상자 수 히어로 카드 */
-.res-hero{border-radius:var(--rl);padding:22px 20px 16px;text-align:center}
-.res-hero.done{background:linear-gradient(160deg,#EBF5DF 0%,#E0F0D0 100%);border:0.5px solid #3B6D11}
-.res-hero.loading{background:var(--bs);border:0.5px solid var(--b3)}
-.res-hero.fallback{background:var(--bs);border:0.5px solid var(--b3)}
-.res-hero.error{background:#FCEBEB;border:0.5px solid #F7C1C1}
-.res-num-wrap{display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;line-height:1}
-.res-big-num{font-size:48px;font-weight:700;color:#27500A;letter-spacing:-2px;font-variant-numeric:tabular-nums}
-.res-big-num.anim{color:#C5D9B0;animation:resPulse 1.3s ease-in-out infinite}
-@keyframes resPulse{0%,100%{opacity:1}50%{opacity:.35}}
-.res-big-unit{font-size:22px;font-weight:600;color:#3B6D11}
-.res-big-label{font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:7px}
-.res-big-cond{font-size:11px;color:#639922;font-family:'SF Mono','Fira Code',monospace;line-height:1.6;word-break:break-all}
-.res-big-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:13px;padding-top:11px;border-top:0.5px solid rgba(59,109,17,.15)}
-.res-time-lbl{font-size:10px;color:#639922}
-.res-csv-badge{font-size:11px;background:#fff;border:0.5px solid #639922;border-radius:4px;padding:2px 7px;color:#3B6D11}
-.res-copy-num{background:#fff;border:0.5px solid #3B6D11;color:#3B6D11;border-radius:5px;padding:4px 12px;font-size:11px;font-family:inherit;cursor:pointer;transition:all .1s;margin-left:auto}
-.res-copy-num:hover{background:#EAF3DE}
-
-/* 하단: Cube.js 쿼리 */
-.res-query-box{background:#fff;border:0.5px solid var(--b2);border-radius:var(--rm);overflow:hidden}
-.res-query-hd{background:var(--bs);border-bottom:0.5px solid var(--b2);padding:8px 13px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:500;color:var(--ts)}
-.res-query-code{margin:0;padding:10px 13px;font-size:11px;font-family:'SF Mono','Fira Code',monospace;color:var(--ts);line-height:1.7;white-space:pre;overflow-x:auto;background:#fff}
+.sent-box{margin-top:10px;background:#EAF3DE;border:0.5px solid #639922;border-radius:var(--border-radius-md);padding:9px 12px}
+.sent-t{font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:2px;display:flex;align-items:center;gap:5px}
+.sent-s{font-size:11px;color:#639922;font-family:monospace;line-height:1.5}
 </style>
-</head>
-<body>
-<div class="page-wrap">
 
-  <div class="page-header">
-    <div class="page-title">📤 직방 푸시 콘솔</div>
-    <span class="page-badge">zb · hg</span>
-  </div>
-
-  <div id="root"></div>
-</div>
+<div id="root"></div>
 
 <script>
 const DEFS={
@@ -205,92 +84,38 @@ const DEFS={
 
 const SEGS={
   zb:[
-    {nm:'전환 임박',   ico:'🔥', ac:'amber', ds:'Active · CRM 400·500 · 푸시허용',       f:{lifecycle:['active'],crm:['400','500'],push:['허용']}},
-    {nm:'넛지 최적',   ico:'🔔', ac:'blue',  ds:'Active · CRM 300 · 푸시허용',           f:{lifecycle:['active'],crm:['300'],push:['허용']}},
-    {nm:'재인게이지',  ico:'🔄', ac:'blue',  ds:'Inactive · CRM 300↑ · 푸시허용',       f:{lifecycle:['inactive'],crm:['300','400','500'],push:['허용']}},
-    {nm:'신규 유저',   ico:'🌱', ac:'green', ds:'NRU · 푸시허용',                         f:{lifecycle:['nru'],push:['허용']}},
-    {nm:'아파트 매매', ico:'🏠', ac:'blue',  ds:'Active · 아파트 · 매매 · 푸시허용',     f:{lifecycle:['active'],property:['아파트'],transaction:['매매'],push:['허용']}},
-    {nm:'즉시 이사',   ico:'⚡', ac:'amber', ds:'Active · 긴박도:즉시 · 푸시허용',       f:{lifecycle:['active'],urgency:['즉시'],push:['허용']}},
-    {nm:'원오빌 전세', ico:'🏢', ac:'blue',  ds:'Active · 원오빌 · 전세 · 푸시허용',     f:{lifecycle:['active'],property:['원오빌'],transaction:['전세'],push:['허용']}},
-    {nm:'서울 30·40대',ico:'📍', ac:'blue',  ds:'Active · 서울 · 30·40대 · 푸시허용',   f:{lifecycle:['active'],region:['서울특별시'],age:['30대','40대'],push:['허용']}},
+    {nm:'전환 임박',   ico:'ti-flame',      ac:'amber', ds:'Active · CRM 400·500 · 푸시허용',       f:{lifecycle:['active'],crm:['400','500'],push:['허용']}},
+    {nm:'넛지 최적',   ico:'ti-bell',       ac:'blue',  ds:'Active · CRM 300 · 푸시허용',           f:{lifecycle:['active'],crm:['300'],push:['허용']}},
+    {nm:'재인게이지',  ico:'ti-refresh',    ac:'blue',  ds:'Inactive · CRM 300↑ · 푸시허용',       f:{lifecycle:['inactive'],crm:['300','400','500'],push:['허용']}},
+    {nm:'신규 유저',   ico:'ti-leaf',       ac:'green', ds:'NRU · 푸시허용',                         f:{lifecycle:['nru'],push:['허용']}},
+    {nm:'아파트 매매', ico:'ti-home',       ac:'blue',  ds:'Active · 아파트 · 매매 · 푸시허용',     f:{lifecycle:['active'],property:['아파트'],transaction:['매매'],push:['허용']}},
+    {nm:'즉시 이사',   ico:'ti-bolt',       ac:'amber', ds:'Active · 긴박도:즉시 · 푸시허용',       f:{lifecycle:['active'],urgency:['즉시'],push:['허용']}},
+    {nm:'원오빌 전세', ico:'ti-building',   ac:'blue',  ds:'Active · 원오빌 · 전세 · 푸시허용',     f:{lifecycle:['active'],property:['원오빌'],transaction:['전세'],push:['허용']}},
+    {nm:'서울 30·40대',ico:'ti-map-pin',    ac:'blue',  ds:'Active · 서울 · 30·40대 · 푸시허용',   f:{lifecycle:['active'],region:['서울특별시'],age:['30대','40대'],push:['허용']}},
   ],
   hg:[
-    {nm:'마케팅 동의', ico:'✅', ac:'green', ds:'마케팅동의 · 모바일인증',              f:{ad:['1'],mobile:['1']}},
-    {nm:'카카오 회원', ico:'💬', ac:'amber', ds:'카카오로그인 · 마케팅동의',            f:{login:['kakao'],ad:['1']}},
-    {nm:'중개업소',    ico:'🏢', ac:'blue',  ds:'중개업소 회원',                        f:{subtype:['1']}},
-    {nm:'최근 활성',   ico:'📈', ac:'green', ds:'7일 이내 접속 · 마케팅동의',          f:{recency:['7일 이내'],ad:['1']}},
+    {nm:'마케팅 동의', ico:'ti-check',         ac:'green', ds:'마케팅동의 · 모바일인증',              f:{ad:['1'],mobile:['1']}},
+    {nm:'카카오 회원', ico:'ti-message',        ac:'amber', ds:'카카오로그인 · 마케팅동의',            f:{login:['kakao'],ad:['1']}},
+    {nm:'중개업소',    ico:'ti-building',       ac:'blue',  ds:'중개업소 회원',                        f:{subtype:['1']}},
+    {nm:'최근 활성',   ico:'ti-trending-up',    ac:'green', ds:'7일 이내 접속 · 마케팅동의',          f:{recency:['7일 이내'],ad:['1']}},
   ]
 };
 
 let curSvc='zb', csvOn=false;
 const sel={zb:{},hg:{}}, tagMap={zb:{},hg:{}};
-
-/* Cube API 설정 - MCP URL을 입력하면 직접 조회, 비워두면 채팅 전달 방식 사용 */
-const ZIGBANG_MCP_URL = 'https://mcp-gw.zigbang.io/';
-
-// [FIX] CSV 추출용 user_no dimension
-const CSV_DIM = {
-  zb: 'zb_user_profile_all.user_no',
-  hg: 'hogangnono_user.user_no',
-};
-
-const CUBE_DIM = {
-  zb: {
-    region:      'zb_user_profile_all.current_local1',
-    gender:      'zb_user_profile_all.gender',
-    age:         'zb_user_profile_all.age_group',
-    lifecycle:   'zb_user_profile_all.lifecycle_stage',
-    crm:         'zb_user_profile_all.apart_crm_grade',
-    property:    'zb_user_profile_all.pref_property_type',
-    transaction: 'zb_user_profile_all.pref_transaction_type',
-    urgency:     'zb_user_profile_all.urgency_level',
-    push:        'zb_user_profile_all.is_push_enabled',
-  },
-  hg: {
-    sex:     'hogangnono_user.sex',
-    ad:      'hogangnono_user.ad',
-    login:   'hogangnono_user.login_type',
-    subtype: 'hogangnono_user.subtype',
-    mobile:  'hogangnono_user.mobile_verified',
-    recency: 'hogangnono_user.recency',
-  }
-};
-
-function buildCsvQuery(svc, selectedFilters) {
-  const dimMap = CUBE_DIM[svc] || {};
-  const filters = [];
-  Object.entries(selectedFilters).forEach(([key, values]) => {
-    if (!dimMap[key] || !values.length) return;
-    const vals = key === 'crm' ? values.map(Number) : values;
-    filters.push({ member: dimMap[key], operator: 'equals', values: vals });
-  });
-  return { dimensions: [CSV_DIM[svc]], filters, limit: 50000 };
-}
-
-function buildCubeQuery(svc, selectedFilters) {
-  const cube = DEFS[svc].cube;
-  const dimMap = CUBE_DIM[svc] || {};
-  const filters = [];
-  Object.entries(selectedFilters).forEach(([key, values]) => {
-    if (!dimMap[key] || !values.length) return;
-    const vals = key === 'crm' ? values.map(Number) : values;
-    filters.push({ member: dimMap[key], operator: 'equals', values: vals });
-  });
-  return { measures: [`${cube}.user_count`], filters };
-}
-
 ['zb','hg'].forEach(s=>Object.keys(DEFS[s].groups).forEach(k=>{sel[s][k]=new Set();tagMap[s][k]={};}));
 
 function mk(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
+function icon(cls){const i=mk('i',cls);i.setAttribute('aria-hidden','true');return i;}
 
 function build(){
   const root=document.getElementById('root');
 
   const tabs=mk('div','svc-tabs');
-  [{s:'zb',ico:'🏠',nm:'직방'},{s:'hg',ico:'🔍',nm:'호갱노노'}].forEach(({s,ico,nm})=>{
+  [{s:'zb',ic:'ti ti-home',nm:'직방'},{s:'hg',ic:'ti ti-search',nm:'호갱노노'}].forEach(({s,ic,nm})=>{
     const b=mk('button','svc-tab'+(s==='zb'?' tab-zb-on':''));
-    b.id='tab-'+s;
-    b.textContent=ico+' '+nm;
+    b.id='tab-'+s; b.appendChild(icon(ic));
+    b.appendChild(document.createTextNode(' '+nm));
     b.addEventListener('click',()=>switchSvc(s));
     tabs.appendChild(b);
   });
@@ -302,7 +127,8 @@ function build(){
   nlIn.rows=1;
   nlIn.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();triggerNL();}});
   const nlBt=mk('button','nl-btn'); nlBt.id='nl-btn';
-  nlBt.textContent='▶ 분석';
+  nlBt.appendChild(icon('ti ti-arrow-right'));
+  nlBt.appendChild(document.createTextNode(' 분석'));
   nlBt.addEventListener('click',triggerNL);
   nlWrap.appendChild(nlIn); nlWrap.appendChild(nlBt);
   root.appendChild(nlWrap);
@@ -318,7 +144,7 @@ function build(){
     const segsRow=mk('div','segs-row'); segsRow.id='segs-'+s;
     SEGS[s].forEach(seg=>{
       const card=mk('button','seg a-'+seg.ac);
-      const ico=mk('div','seg-ico'); ico.textContent=seg.ico; card.appendChild(ico);
+      const ico=mk('div','seg-ico'); ico.appendChild(icon('ti '+seg.ico)); card.appendChild(ico);
       const txt=mk('div');
       const nm=mk('div','seg-nm'); nm.textContent=seg.nm; txt.appendChild(nm);
       const ds=mk('div','seg-ds'); ds.textContent=seg.ds; txt.appendChild(ds);
@@ -376,13 +202,13 @@ function build(){
   const btnRst=mk('button','btn-rst'); btnRst.textContent='초기화';
   btnRst.addEventListener('click',resetAll);
   const btnQ=mk('button','btn-q zb'); btnQ.id='btn-q';
-  btnQ.textContent='🔍 대상 유저 조회';
+  btnQ.appendChild(icon('ti ti-search'));
+  btnQ.appendChild(document.createTextNode(' 대상 유저 조회'));
   btnQ.addEventListener('click',runQuery);
   [cntLbl,csvTog,btnRst,btnQ].forEach(el=>bot.appendChild(el));
   root.appendChild(bot);
 
   const sent=mk('div'); sent.id='sent'; root.appendChild(sent);
-  const resPanel=mk('div','result-panel'); resPanel.id='result-panel'; root.appendChild(resPanel);
 }
 
 function switchSvc(s){
@@ -412,57 +238,35 @@ function applyFilters(s,filters){
   updateSummary();
 }
 
-function parseNLLocal(text,svc){
-  const def=DEFS[svc].groups;
-  const result={};
-  Object.entries(def).forEach(([key,cfg])=>{
-    cfg.opts.map(o=>typeof o==='string'?{l:o,v:o}:o).forEach(({l,v})=>{
-      if(text.includes(l)||(v!==l&&text.includes(v))){
-        if(!result[key]) result[key]=[];
-        if(!result[key].includes(v)) result[key].push(v);
-      }
-    });
-  });
-  const aliases={
-    zb:{
-      lifecycle:{'활성':['active'],'비활성':['inactive'],'신규':['nru']},
-      push:{'푸시허용':['허용'],'알림허용':['허용']},
-      age:{'30·40대':['30대','40대'],'30대40대':['30대','40대'],'2030':['20대','30대']},
-    },
-    hg:{
-      ad:{'마케팅동의':['1'],'동의':['1']},
-      mobile:{'인증완료':['1'],'인증':['1']},
-    }
-  };
-  const al=aliases[svc]||{};
-  Object.entries(al).forEach(([key,map])=>{
-    Object.entries(map).forEach(([alias,vals])=>{
-      if(text.includes(alias)){
-        if(!result[key]) result[key]=[];
-        vals.forEach(v=>{ if(!result[key].includes(v)) result[key].push(v); });
-      }
-    });
-  });
-  const hasCsv=['csv','CSV','추출','다운로드','리스트','명단'].some(k=>text.includes(k));
-  return {filters:result, csv:hasCsv};
-}
-
-function triggerNL(){
+async function triggerNL(){
   const text=document.getElementById('nl-in').value.trim();
   if(!text) return;
+  const btn=document.getElementById('nl-btn');
   const st=document.getElementById('nl-st');
-  st.className='nl-status';
-  const {filters,csv}=parseNLLocal(text,curSvc);
-  const matchCount=Object.values(filters).reduce((s,v)=>s+v.length,0);
-  if(matchCount===0){
-    st.className='nl-status err';
-    st.textContent='일치하는 필터가 없습니다. 직접 태그를 선택해 주세요.';
-    return;
-  }
-  if(csv){csvOn=true;document.getElementById('csv-tog').classList.add('on');}
-  applyFilters(curSvc,filters);
-  st.textContent=matchCount+'개 조건 인식됨';
-  runQuery();
+  btn.disabled=true; st.className='nl-status'; st.textContent='분석 중...';
+  try{
+    const def=DEFS[curSvc];
+    const filterDesc=Object.entries(def.groups)
+      .map(([k,g])=>k+': '+g.opts.map(o=>typeof o==='string'?o:o.v).join(', ')).join('\n');
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:400,
+        system:'한국어 자연어를 push 콘솔 필터 JSON으로 변환하는 파서.\n\n사용 가능 필터:\n'+filterDesc+'\ncsv: true/false (CSV 다운로드 여부)\n\nJSON 객체만 반환. 설명 없이.',
+        messages:[{role:'user',content:text}]
+      })
+    });
+    const data=await res.json();
+    const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```(?:json)?|```/g,'').trim());
+    if(parsed.csv){csvOn=true;document.getElementById('csv-tog').classList.add('on');}
+    const {csv:_,...filterOnly}=parsed;
+    applyFilters(curSvc,filterOnly);
+    st.textContent='';
+    runQuery();
+  }catch(e){
+    st.className='nl-status err'; st.textContent='분석 실패 — '+e.message;
+  }finally{btn.disabled=false;}
 }
 
 function resetAll(){
@@ -470,30 +274,8 @@ function resetAll(){
     sel[s][k].forEach(v=>{const el=tagMap[s][k][v];if(el)el.classList.remove('on-blue','on-green','on-amber');});
     sel[s][k].clear();
   }));
-  window._zbCsvMeta=null;
   document.getElementById('sent').innerHTML='';
-  document.getElementById('result-panel').innerHTML='';
   updateSummary();
-}
-
-// [FIX] CSV 다운로드: user_no dimension 쿼리를 Claude에 위임
-function requestCsvDownload(){
-  const meta=window._zbCsvMeta;
-  if(!meta){alert('먼저 대상 유저를 조회해 주세요.');return;}
-  const btn=document.getElementById('csv-dl-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ 요청 중…';}
-  if(typeof sendPrompt==='function'){
-    const prompt=`아래 Cube.js 쿼리를 zigbang-gateway MCP의 de-cube-mcp__run_cube_query 도구로 실행하고, 결과 user_no 목록을 CSV 파일(파일명: push_target.csv, 헤더: user_no)로 만들어 다운로드할 수 있게 제공해주세요.
-
-서비스: ${meta.svc}
-조건: ${meta.condStr}
-
-\`\`\`json
-${JSON.stringify(meta.cubeQuery,null,2)}
-\`\`\``;
-    sendPrompt(prompt);
-  }
-  setTimeout(()=>{if(btn){btn.disabled=false;btn.textContent='📥 CSV 다운로드';}},3000);
 }
 
 function updateSummary(){
@@ -513,105 +295,20 @@ function updateSummary(){
 
 function runQuery(){
   const s=curSvc,def=DEFS[s].groups,filters={};
-  Object.entries(def).forEach(([k])=>{ if(sel[s][k].size) filters[k]=[...sel[s][k]]; });
+  Object.entries(def).forEach(([k])=>{if(sel[s][k].size)filters[k]=[...sel[s][k]];});
   const parts=Object.entries(filters).map(([k,vals])=>{
     const cfg=def[k];
     const lbls=vals.map(v=>{const o=cfg.opts.find(x=>(typeof x==='string'?x:x.v)===v);return typeof o==='string'?o:(o?o.l:v);});
     return cfg.label+': '+lbls.join(', ');
   });
   const condStr=parts.length?parts.join(' / '):'전체 (필터 없음)';
-  const cubeQuery=buildCubeQuery(s,filters);
-  // [FIX] CSV 다운로드 버튼에서 참조할 메타 전역 저장
-  window._zbCsvMeta={ svc:s, condStr, cubeQuery: buildCsvQuery(s,filters) };
-  const rp=document.getElementById('result-panel');
-  document.getElementById('sent').innerHTML='';
-  rp.innerHTML=buildResultHTML(null,condStr,cubeQuery,csvOn,'fallback');
-  /* sendPrompt로 Claude 채팅에 MCP 실행 위임 */
-  if(typeof sendPrompt==='function'){
-    const prompt=`아래 Cube.js 쿼리를 zigbang-gateway MCP의 de-cube-mcp__run_cube_query 도구로 실행하고, 결과의 user_count 숫자만 간단히 알려주세요.
-
-서비스: ${s} (cube: ${DEFS[s].cube})
-조건: ${condStr}${csvOn?' [CSV 포함]':''}
-
-\`\`\`json
-${JSON.stringify(cubeQuery,null,2)}
-\`\`\``;
-    sendPrompt(prompt);
-  }
-}
-
-function buildResultHTML(count,condStr,cubeQuery,csv,state,errMsg){
-  const qJson=JSON.stringify(cubeQuery,null,2);
-  window._zbQueryStr=qJson;
-  const qEsc=qJson.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // [FIX] CSV 버튼 (csv=true일 때 fallback·done 모두 노출)
-  const csvBar=csv?`
-    <div style="display:flex;align-items:center;gap:8px;margin-top:11px;padding-top:11px;border-top:0.5px solid var(--b3)">
-      <button id="csv-dl-btn" onclick="requestCsvDownload()"
-        style="display:flex;align-items:center;gap:6px;background:${state==='done'?'#3B6D11':'var(--bs)'};
-               color:${state==='done'?'#fff':'var(--ts)'};border:0.5px solid ${state==='done'?'#3B6D11':'var(--b2)'};
-               border-radius:var(--rm);padding:8px 16px;font-size:12px;font-weight:500;
-               font-family:inherit;cursor:pointer">📥 CSV 다운로드</button>
-      <span style="font-size:11px;color:var(--tt)">위 채팅에서 user_count 확인 후 클릭하세요</span>
-    </div>`:'';
-  let hero='';
-  if(state==='loading'){
-    hero=`
-      <div class="res-num-wrap">
-        <span class="res-big-num anim">—</span>
-        <span class="res-big-unit" style="color:var(--b1)">명</span>
-      </div>
-      <div class="res-big-label" style="color:var(--tt)">조회 중…</div>
-      <div class="res-big-cond" style="color:var(--b2)">${condStr}</div>`;
-  } else if(state==='done'){
-    const fmt=count.toLocaleString('ko-KR');
-    const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-    hero=`
-      <div class="res-num-wrap">
-        <span class="res-big-num">${fmt}</span>
-        <span class="res-big-unit">명</span>
-      </div>
-      <div class="res-big-label">푸시 발송 가능 대상</div>
-      <div class="res-big-cond">${condStr}</div>
-      <div class="res-big-footer">
-        <span class="res-time-lbl">${now} 기준</span>
-        <button class="res-copy-num" data-n="${count}"
-          onclick="navigator.clipboard.writeText(this.dataset.n).catch(()=>{});
-                   const p=this.textContent;this.textContent='✓ 복사됨';
-                   setTimeout(()=>this.textContent=p,2000)">📋 수 복사</button>
-      </div>
-      ${csvBar}`;
-  } else if(state==='fallback'){
-    hero=`
-      <div class="res-num-wrap">
-        <span style="font-size:36px;color:var(--b1);letter-spacing:-1px">?,???</span>
-        <span class="res-big-unit" style="color:var(--b1)">명</span>
-      </div>
-      <div class="res-big-label" style="color:var(--ts)">⬆ 위 채팅에서 결과 확인</div>
-      <div class="res-big-cond">${condStr}</div>
-      ${csvBar}`;
-  } else if(state==='error'){
-    hero=`
-      <div style="font-size:26px;margin-bottom:6px">❌</div>
-      <div class="res-big-label" style="color:#A32D2D">조회 실패</div>
-      <div style="font-size:11px;color:#A32D2D;margin-top:4px">${errMsg||''}</div>`;
-  }
-  return `
-    <div class="res-hero ${state}">${hero}</div>
-    <div class="res-query-box">
-      <div class="res-query-hd">
-        <span>⚡ Cube.js 쿼리</span>
-        <button class="copy-btn"
-          onclick="navigator.clipboard.writeText(window._zbQueryStr).catch(()=>{});
-                   this.textContent='✓ 복사됨';this.classList.add('ok');
-                   setTimeout(()=>{this.textContent='📋 복사';this.classList.remove('ok')},2000)">
-          📋 복사</button>
-      </div>
-      <pre class="res-query-code">${qEsc}</pre>
-    </div>`;
+  const payload={service:s,cube:DEFS[s].cube,csv:csvOn,filters};
+  document.getElementById('sent').innerHTML=
+    '<div class="sent-box"><div class="sent-t"><i class="ti ti-send" style="font-size:13px" aria-hidden="true"></i> 조회 요청 전송됨'+(csvOn?' · CSV 포함':'')+'</div><div class="sent-s">'+condStr+'</div></div>';
+  const btn=document.getElementById('btn-q');
+  btn.disabled=true; setTimeout(()=>{btn.disabled=false;},3000);
+  sendPrompt('__CUBE_QUERY__ '+JSON.stringify(payload)+'\n조건: '+condStr+(csvOn?' [CSV 다운로드 포함]':''));
 }
 
 build();
 </script>
-</body>
-</html>
