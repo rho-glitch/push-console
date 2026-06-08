@@ -61,12 +61,27 @@ body{font-family:system-ui,sans-serif;background:transparent;color:var(--color-t
 .empty-msg{font-size:11px;color:var(--color-text-tertiary)}
 .bot{display:flex;align-items:center;gap:8px}
 .cnt-lbl{font-size:11px;color:var(--color-text-tertiary);flex-shrink:0;min-width:48px}
-.csv-tog{display:flex;align-items:center;gap:5px;padding:8px 11px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-secondary);flex-shrink:0;user-select:none;transition:all .12s}
-.csv-tog.on{background:#EAF3DE;border-color:#3B6D11}
-.cb{width:13px;height:13px;border-radius:3px;border:0.5px solid var(--color-border-primary);background:var(--color-background-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:500;color:transparent;transition:all .12s}
-.csv-tog.on .cb{background:#3B6D11;border-color:#3B6D11;color:#fff}
-.cb-l{font-size:12px;color:var(--color-text-secondary)}
-.csv-tog.on .cb-l{color:#27500A}
+/* ── mode selector ─────────────────────────────── */
+.mode-seg{display:flex;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;flex-shrink:0}
+.mode-opt{padding:7px 10px;border:none;border-right:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:12px;font-family:inherit;cursor:pointer;color:var(--color-text-secondary);transition:all .12s;white-space:nowrap;line-height:1}
+.mode-opt:last-child{border-right:none}
+.mode-opt.on-csv  {background:#EAF3DE;color:#27500A}
+.mode-opt.on-admin{background:#E6F1FB;color:#0C447C}
+.mode-opt.on-both {background:#FAEEDA;color:#633806}
+/* ── api settings panel ────────────────────────── */
+.api-cfg{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;margin-top:8px;display:none}
+.api-cfg.show{display:block}
+.api-hd{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.api-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.api-row:last-child{margin-bottom:0}
+.api-lbl{font-size:11px;color:var(--color-text-secondary);flex-shrink:0;width:68px}
+.api-inp{flex:1;border:0.5px solid var(--color-border-secondary);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;background:var(--color-background-primary);color:var(--color-text-primary);outline:none}
+.api-inp:focus{border-color:#378ADD}
+.api-inp::placeholder{color:var(--color-text-tertiary)}
+.api-save{border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);border-radius:6px;padding:6px 11px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--color-text-secondary);flex-shrink:0;transition:all .12s}
+.api-save:hover{border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.api-saved-msg{color:#3B6D11;font-size:11px;display:none;flex-shrink:0}
+/* ── bottom ────────────────────────────────────── */
 .btn-rst{background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);border-radius:var(--border-radius-md);padding:8px 13px;font-size:12px;font-family:inherit;cursor:pointer;flex-shrink:0;transition:all .12s}
 .btn-rst:hover{background:var(--color-background-primary)}
 .btn-q{flex:1;border:none;color:#fff;border-radius:var(--border-radius-md);padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .12s}
@@ -84,7 +99,7 @@ body{font-family:system-ui,sans-serif;background:transparent;color:var(--color-t
 <body>
 <div id="root"></div>
 <script>
-/* ── 인라인 SVG 아이콘 (CDN 의존 없음) ────────────────────── */
+/* ── 인라인 SVG 아이콘 ───────────────────────────────────── */
 const ICONS={
   'home':        '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
   'search':      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
@@ -103,19 +118,17 @@ const ICONS={
   'alert-circle':'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
   'phone':       '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.09 12.5 19.79 19.79 0 0 1 1 3.83 2 2 0 0 1 3 1.82h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
   'eye':         '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  'settings':    '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
 };
 
-/* SVG 엘리먼트 반환 */
-function icon(name, size=16){
+function icon(name,size=16){
   const span=document.createElement('span');
   span.setAttribute('aria-hidden','true');
   span.style.cssText='display:inline-flex;align-items:center;flex-shrink:0';
   span.innerHTML=`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;
   return span;
 }
-
-/* innerHTML용 SVG 문자열 */
-function svgStr(name, size=13){
+function svgStr(name,size=13){
   return `<span aria-hidden="true" style="display:inline-flex;align-items:center"><svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg></span>`;
 }
 
@@ -144,31 +157,107 @@ const DEFS={
 
 const SEGS={
   zb:[
-    {nm:'전환 임박',    ico:'flame',       ac:'amber', ds:'Active · CRM 400·500 · 푸시허용',      f:{lifecycle:['active'],crm:['400','500'],push:['허용']}},
-    {nm:'넛지 최적',    ico:'bell',        ac:'blue',  ds:'Active · CRM 300 · 푸시허용',          f:{lifecycle:['active'],crm:['300'],push:['허용']}},
-    {nm:'재인게이지',   ico:'refresh',     ac:'blue',  ds:'Inactive · CRM 300↑ · 푸시허용',      f:{lifecycle:['inactive'],crm:['300','400','500'],push:['허용']}},
-    {nm:'신규 유저',    ico:'leaf',        ac:'green', ds:'NRU · 푸시허용',                        f:{lifecycle:['nru'],push:['허용']}},
-    {nm:'아파트 매매',  ico:'home',        ac:'blue',  ds:'Active · 아파트 · 매매 · 푸시허용',    f:{lifecycle:['active'],property:['아파트'],transaction:['매매'],push:['허용']}},
-    {nm:'즉시 이사',    ico:'bolt',        ac:'amber', ds:'Active · 긴박도:즉시 · 푸시허용',      f:{lifecycle:['active'],urgency:['즉시'],push:['허용']}},
-    {nm:'원오빌 전세',  ico:'building',    ac:'blue',  ds:'Active · 원오빌 · 전세 · 푸시허용',    f:{lifecycle:['active'],property:['원오빌'],transaction:['전세'],push:['허용']}},
-    {nm:'서울 30·40대', ico:'map-pin',     ac:'blue',  ds:'Active · 서울 · 30·40대 · 푸시허용',  f:{lifecycle:['active'],region:['서울특별시'],age:['30대','40대'],push:['허용']}},
-    {nm:'아파트 문의전환',ico:'phone',     ac:'amber', ds:'Active · 아파트 · CRM 200·300 · 푸시허용', f:{lifecycle:['active'],property:['아파트'],crm:['200','300'],push:['허용']}},
-    {nm:'Frozen 매물전환',ico:'eye',       ac:'blue',  ds:'Frozen · CRM 100·200 · 매물조회 유도 · 푸시허용', f:{lifecycle:['frozen'],crm:['100','200'],push:['허용']}},
+    {nm:'전환 임박',      ico:'flame',      ac:'amber',ds:'Active · CRM 400·500 · 푸시허용',                     f:{lifecycle:['active'],crm:['400','500'],push:['허용']}},
+    {nm:'넛지 최적',      ico:'bell',       ac:'blue', ds:'Active · CRM 300 · 푸시허용',                         f:{lifecycle:['active'],crm:['300'],push:['허용']}},
+    {nm:'재인게이지',     ico:'refresh',    ac:'blue', ds:'Inactive · CRM 300↑ · 푸시허용',                     f:{lifecycle:['inactive'],crm:['300','400','500'],push:['허용']}},
+    {nm:'신규 유저',      ico:'leaf',       ac:'green',ds:'NRU · 푸시허용',                                       f:{lifecycle:['nru'],push:['허용']}},
+    {nm:'아파트 매매',    ico:'home',       ac:'blue', ds:'Active · 아파트 · 매매 · 푸시허용',                   f:{lifecycle:['active'],property:['아파트'],transaction:['매매'],push:['허용']}},
+    {nm:'즉시 이사',      ico:'bolt',       ac:'amber',ds:'Active · 긴박도:즉시 · 푸시허용',                     f:{lifecycle:['active'],urgency:['즉시'],push:['허용']}},
+    {nm:'원오빌 전세',    ico:'building',   ac:'blue', ds:'Active · 원오빌 · 전세 · 푸시허용',                   f:{lifecycle:['active'],property:['원오빌'],transaction:['전세'],push:['허용']}},
+    {nm:'서울 30·40대',   ico:'map-pin',    ac:'blue', ds:'Active · 서울 · 30·40대 · 푸시허용',                  f:{lifecycle:['active'],region:['서울특별시'],age:['30대','40대'],push:['허용']}},
+    {nm:'아파트 문의전환',ico:'phone',      ac:'amber',ds:'Active · 아파트 · CRM 200·300 · 푸시허용',            f:{lifecycle:['active'],property:['아파트'],crm:['200','300'],push:['허용']}},
+    {nm:'Frozen 매물전환',ico:'eye',        ac:'blue', ds:'Frozen · CRM 100·200 · 매물조회 유도 · 푸시허용',     f:{lifecycle:['frozen'],crm:['100','200'],push:['허용']}},
   ],
   hg:[
-    {nm:'마케팅 동의',  ico:'check',         ac:'green', ds:'마케팅동의 · 모바일인증',             f:{ad:['1'],mobile:['1']}},
-    {nm:'카카오 회원',  ico:'message',        ac:'amber', ds:'카카오로그인 · 마케팅동의',           f:{login:['kakao'],ad:['1']}},
-    {nm:'중개업소',     ico:'building',       ac:'blue',  ds:'중개업소 회원',                       f:{subtype:['1']}},
-    {nm:'최근 활성',    ico:'trending-up',    ac:'green', ds:'7일 이내 접속 · 마케팅동의',         f:{recency:['7일 이내'],ad:['1']}},
+    {nm:'마케팅 동의', ico:'check',       ac:'green',ds:'마케팅동의 · 모바일인증',    f:{ad:['1'],mobile:['1']}},
+    {nm:'카카오 회원', ico:'message',     ac:'amber',ds:'카카오로그인 · 마케팅동의',  f:{login:['kakao'],ad:['1']}},
+    {nm:'중개업소',    ico:'building',    ac:'blue', ds:'중개업소 회원',               f:{subtype:['1']}},
+    {nm:'최근 활성',   ico:'trending-up', ac:'green',ds:'7일 이내 접속 · 마케팅동의', f:{recency:['7일 이내'],ad:['1']}},
   ]
 };
 
 /* ── 상태 ────────────────────────────────────────────────── */
-let curSvc='zb', csvOn=false;
+let curSvc='zb', outputMode='csv';
+let apiCfg={endpoint:'',key:''};
+try{const s=localStorage.getItem('zb_push_api');if(s)apiCfg=JSON.parse(s);}catch(e){}
+
 const sel={zb:{},hg:{}}, tagMap={zb:{},hg:{}};
 ['zb','hg'].forEach(s=>Object.keys(DEFS[s].groups).forEach(k=>{sel[s][k]=new Set();tagMap[s][k]={};}));
 
 function mk(t,c){const e=document.createElement(t);if(c)e.className=c;return e;}
+
+/* ── 모드 셀렉터 ─────────────────────────────────────────── */
+const MODE_OPTS=[
+  {v:'csv',  l:'CSV 다운로드', cls:'on-csv'},
+  {v:'admin',l:'어드민 등록',  cls:'on-admin'},
+  {v:'both', l:'둘 다',        cls:'on-both'},
+];
+function buildModeSeg(){
+  const seg=mk('div','mode-seg'); seg.id='mode-seg';
+  MODE_OPTS.forEach(({v,l,cls})=>{
+    const btn=mk('button','mode-opt'+(outputMode===v?' '+cls:''));
+    btn.textContent=l; btn.dataset.mode=v;
+    btn.addEventListener('click',()=>{
+      outputMode=v;
+      refreshModeUI();
+      updateApiPanel();
+    });
+    seg.appendChild(btn);
+  });
+  return seg;
+}
+function refreshModeUI(){
+  document.querySelectorAll('.mode-opt').forEach(b=>{
+    const mo=MODE_OPTS.find(o=>o.v===b.dataset.mode);
+    if(!mo) return;
+    b.className='mode-opt'+(outputMode===mo.v?' '+mo.cls:'');
+  });
+}
+function updateApiPanel(){
+  const p=document.getElementById('api-cfg-panel');
+  if(p) p.classList.toggle('show', outputMode==='admin'||outputMode==='both');
+}
+
+/* ── API 설정 패널 ───────────────────────────────────────── */
+function buildApiCfg(){
+  const panel=mk('div','api-cfg'); panel.id='api-cfg-panel';
+  if(outputMode==='admin'||outputMode==='both') panel.classList.add('show');
+
+  const hd=mk('div','api-hd');
+  hd.appendChild(icon('settings',11));
+  hd.appendChild(document.createTextNode(' 어드민 API 설정'));
+  panel.appendChild(hd);
+
+  // 엔드포인트 행
+  const r1=mk('div','api-row');
+  const l1=mk('span','api-lbl'); l1.textContent='엔드포인트';
+  const i1=mk('input','api-inp'); i1.id='api-ep'; i1.type='text';
+  i1.placeholder='https://admin.zigbang.com/api/push/targets';
+  i1.value=apiCfg.endpoint;
+  r1.appendChild(l1); r1.appendChild(i1);
+  panel.appendChild(r1);
+
+  // API Key 행
+  const r2=mk('div','api-row');
+  const l2=mk('span','api-lbl'); l2.textContent='API Key';
+  const i2=mk('input','api-inp'); i2.id='api-key'; i2.type='password';
+  i2.placeholder='발급받은 API Key 입력';
+  i2.value=apiCfg.key;
+  const saveBtn=mk('button','api-save'); saveBtn.textContent='저장';
+  const savedMsg=mk('span','api-saved-msg'); savedMsg.id='api-saved-msg'; savedMsg.textContent='✓ 저장됨';
+  saveBtn.addEventListener('click',()=>{
+    const ep=(document.getElementById('api-ep')||{}).value.trim();
+    const k=(document.getElementById('api-key')||{}).value.trim();
+    apiCfg={endpoint:ep,key:k};
+    try{localStorage.setItem('zb_push_api',JSON.stringify(apiCfg));}catch(e){}
+    savedMsg.style.display='inline';
+    setTimeout(()=>{savedMsg.style.display='none';},2000);
+  });
+  r2.appendChild(l2); r2.appendChild(i2); r2.appendChild(saveBtn); r2.appendChild(savedMsg);
+  panel.appendChild(r2);
+
+  return panel;
+}
 
 /* ── DOM 빌드 ────────────────────────────────────────────── */
 function build(){
@@ -188,9 +277,8 @@ function build(){
 
   /* 자연어 입력 */
   const nlWrap=mk('div','nl-wrap');
-  const nlIn=mk('textarea','nl-input');
-  nlIn.id='nl-in';
-  nlIn.placeholder='예) 서울 30-40대 아파트 active 유저 CSV 추출해줘';
+  const nlIn=mk('textarea','nl-input'); nlIn.id='nl-in';
+  nlIn.placeholder='예) 서울 30-40대 아파트 active 유저 어드민에 등록해줘';
   nlIn.rows=1;
   nlIn.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();triggerNL();}});
   const nlBt=mk('button','nl-btn'); nlBt.id='nl-btn';
@@ -207,8 +295,7 @@ function build(){
   ['zb','hg'].forEach(s=>{
     const panel=mk('div'); panel.id='panel-'+s; panel.style.display=s==='zb'?'':'none';
 
-    const secLbl=mk('div','sec-lbl'); secLbl.textContent='추천 세그먼트';
-    panel.appendChild(secLbl);
+    const secLbl=mk('div','sec-lbl'); secLbl.textContent='추천 세그먼트'; panel.appendChild(secLbl);
     const segsRow=mk('div','segs-row');
     SEGS[s].forEach(seg=>{
       const card=mk('button','seg a-'+seg.ac);
@@ -266,17 +353,18 @@ function build(){
   /* 하단 버튼 바 */
   const bot=mk('div','bot');
   const cntLbl=mk('span','cnt-lbl'); cntLbl.id='cnt-lbl'; cntLbl.textContent='0개 조건';
-  const csvTog=mk('div','csv-tog'); csvTog.id='csv-tog';
-  csvTog.innerHTML='<div class="cb" id="cb">✓</div><span class="cb-l">user_no CSV</span>';
-  csvTog.addEventListener('click',()=>{csvOn=!csvOn;csvTog.classList.toggle('on',csvOn);});
+  const modeSeg=buildModeSeg();
   const btnRst=mk('button','btn-rst'); btnRst.textContent='초기화';
   btnRst.addEventListener('click',resetAll);
   const btnQ=mk('button','btn-q zb'); btnQ.id='btn-q';
   btnQ.appendChild(icon('search',14));
   btnQ.appendChild(document.createTextNode(' 대상 유저 조회'));
   btnQ.addEventListener('click',runQuery);
-  [cntLbl,csvTog,btnRst,btnQ].forEach(el=>bot.appendChild(el));
+  [cntLbl,modeSeg,btnRst,btnQ].forEach(el=>bot.appendChild(el));
   root.appendChild(bot);
+
+  /* API 설정 패널 (모드에 따라 show/hide) */
+  root.appendChild(buildApiCfg());
 
   const sent=mk('div'); sent.id='sent'; root.appendChild(sent);
 }
@@ -328,15 +416,19 @@ async function triggerNL(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:400,
-        system:'한국어 자연어를 push 콘솔 필터 JSON으로 변환하는 파서.\n\n사용 가능 필터:\n'+filterDesc+'\ncsv: true/false (CSV 다운로드 여부)\n\nJSON 객체만 반환. 설명 없이.',
+        system:'한국어 자연어를 push 콘솔 필터 JSON으로 변환하는 파서.\n\n사용 가능 필터:\n'+filterDesc+'\nmode: "csv" | "admin" | "both" (출력 방식; "어드민 등록"→admin, "CSV"→csv, 둘다→both, 언급 없으면 생략)\n\nJSON 객체만 반환. 설명 없이.',
         messages:[{role:'user',content:text}]
       })
     });
     const data=await res.json();
     const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
     const parsed=JSON.parse(raw.replace(/```(?:json)?|```/g,'').trim());
-    if(parsed.csv){csvOn=true;document.getElementById('csv-tog').classList.add('on');}
-    const {csv:_,...filterOnly}=parsed;
+    if(parsed.mode&&['csv','admin','both'].includes(parsed.mode)){
+      outputMode=parsed.mode;
+      refreshModeUI();
+      updateApiPanel();
+    }
+    const {mode:_,...filterOnly}=parsed;
     applyFilters(curSvc,filterOnly);
     st.innerHTML='';
     runQuery();
@@ -384,35 +476,49 @@ function runQuery(){
     return cfg.label+': '+lbls.join(', ');
   });
   const condStr=parts.length?parts.join(' / '):'전체 (필터 없음)';
-  const payload={service:s,cube:DEFS[s].cube,csv:csvOn,filters};
+
+  const modeLabel ={csv:'CSV 다운로드',        admin:'어드민 등록',         both:'CSV + 어드민 등록'}[outputMode];
+  const loadLabel  ={csv:'CSV 파일 생성 중...', admin:'어드민 등록 중...',   both:'CSV 생성 + 어드민 등록 중...'}[outputMode];
+  const modeTag    ={csv:'[CSV 다운로드]',      admin:'[어드민 등록]',       both:'[CSV + 어드민 등록]'}[outputMode];
+
+  // 어드민 모드일 때 API 설정 포함 (Key는 SET/UNSET 표시, 실제값은 Claude에게만 전달)
+  const useAdmin=outputMode==='admin'||outputMode==='both';
+  const adminPayload=useAdmin?{
+    endpoint:apiCfg.endpoint||'(미설정)',
+    key:apiCfg.key||'(미설정)',
+  }:undefined;
+
+  const payload={
+    service:s,
+    cube:DEFS[s].cube,
+    mode:outputMode,
+    filters,
+    ...(adminPayload?{admin_api:adminPayload}:{})
+  };
 
   /* 로딩 상태 */
   const sentEl=document.getElementById('sent');
   sentEl.innerHTML=
     '<div class="sent-box loading">'+
-      '<div class="sent-t">'+
-        '<div class="spin" style="border-color:#185FA5;border-top-color:transparent;opacity:1"></div>'+
-        (csvOn?' CSV 파일 생성 중...' : ' 유저 모수 조회 중...')+
-      '</div>'+
+      '<div class="sent-t"><div class="spin" style="border-color:#185FA5;border-top-color:transparent;opacity:1"></div> '+loadLabel+'</div>'+
       '<div class="sent-s">'+condStr+'</div>'+
     '</div>';
 
-  /* 버튼 로딩 */
   const btn=document.getElementById('btn-q');
   const origHTML=btn.innerHTML;
   btn.disabled=true;
-  btn.innerHTML='<div class="spin"></div> '+(csvOn?'CSV 생성 중...':'조회 중...');
+  btn.innerHTML='<div class="spin"></div> '+loadLabel;
   setTimeout(()=>{
     btn.disabled=false;
     btn.innerHTML=origHTML;
     sentEl.innerHTML=
       '<div class="sent-box">'+
-        '<div class="sent-t">'+svgStr('send',13)+' 조회 요청 전송됨'+(csvOn?' · CSV 포함':'')+'</div>'+
+        '<div class="sent-t">'+svgStr('send',13)+' 조회 요청 전송됨 · '+modeLabel+'</div>'+
         '<div class="sent-s">'+condStr+'</div>'+
       '</div>';
   },3000);
 
-  const msg='__CUBE_QUERY__ '+JSON.stringify(payload)+'\n조건: '+condStr+(csvOn?' [CSV 다운로드 포함]':'');
+  const msg='__CUBE_QUERY__ '+JSON.stringify(payload)+'\n조건: '+condStr+' '+modeTag;
   if(typeof sendPrompt==='function') sendPrompt(msg);
   else console.log('[PUSH CONSOLE]',msg);
 }
